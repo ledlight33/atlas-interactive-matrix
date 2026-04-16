@@ -78,9 +78,11 @@ Open `http://localhost:8080` in your browser.
 - No installation, no build tools, no dependencies
 - AI simulation is optional — requires one of: Ollama (local), Anthropic API key, or OpenAI API key
 
-  ### Fully Offline Use
+ Here's the updated section — only step 2 changes to warn about removing the SRI attributes:
 
-The matrix loads React and fonts from CDN by default. For 
+### Fully Offline Use
+
+The matrix loads React and fonts from CDN by default. For
 air-gapped or fully offline environments:
 
 1. Download these files and place them next to `index.html`:
@@ -88,21 +90,23 @@ air-gapped or fully offline environments:
    - [react-dom.production.min.js](https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js)
    - [babel.min.js](https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js)
 
-2. Edit `index.html` — replace the three CDN `<script>` URLs 
-   with local paths:
+2. Edit `index.html` — replace the three CDN `<script>` tags with local paths,
+   removing the `integrity` and `crossorigin` attributes (SRI only applies to
+   CDN-hosted files — leaving them on local files will cause the browser to block them):
 ```html
    <script src="react.production.min.js"></script>
    <script src="react-dom.production.min.js"></script>
    <script src="babel.min.js"></script>
 ```
 
-3. Fonts will fall back to system fonts (Segoe UI, Arial) 
+3. Fonts will fall back to system fonts (Segoe UI, Arial)
    automatically — no visual breakage, just different typography.
 
 4. Run with a local HTTP server for full functionality.
 
-> **Note:** This offline setup has not been extensively tested. 
+> **Note:** This offline setup has not been extensively tested.
 > If you encounter issues, please open an issue on GitHub.
+```
 
 ---
 
@@ -269,13 +273,5 @@ Areas where contributions would be valuable:
 
 
 ---
-
-## Author
-
-Built by a Digital Forensics Investigator and AI Security researcher exploring the intersection of DFIR methodology and adversarial AI.
-https://marinobekios.com/
-linkedin.com/in/marbekios
-
-## Thank you!
 
 If this project is useful, consider giving it a ⭐ — it helps others discover it.
