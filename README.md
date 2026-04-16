@@ -182,6 +182,8 @@ Click **⚙** *Setup AI* → Select provider → Paste your API key → Click **
 - **Not encrypted** at rest — standard `localStorage` behavior, same as any web app session
 - Use "Clear all data" in settings to remove it anytime
 
+![Demo Models Simulation](docs/screenshots/demo1.gif)
+
 ---
 
 ## Model Comparison
