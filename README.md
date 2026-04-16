@@ -42,8 +42,8 @@ Explore 16 tactics, 101 techniques, and 66 sub-techniques — then simulate real
 | Provider | Setup | Best For |
 |----------|-------|----------|
 | **Local Ollama** | Free, offline, private | Security professionals who need data privacy |
-| **Anthropic Claude** | Your API key, ~$0.01/sim | Highest quality attack scenarios |
-| **OpenAI GPT** | Your API key, ~$0.01/sim | Good balance of quality and cost |
+| **Anthropic Claude** | Your API key, ~$0.01/sim (check api provider for charging) | Highest quality attack scenarios |
+| **OpenAI GPT** | Your API key, ~$0.01/sim (check api provider for charging) | Good balance of quality and cost |
 
 ---
 
