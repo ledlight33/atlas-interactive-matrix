@@ -1,0 +1,22 @@
+ATLAS Interactive Matrix
+Copyright 2025 Marino Morikawa
+
+This project uses data from MITRE ATLAS™ (Adversarial Threat Landscape
+for Artificial Intelligence Systems).
+
+© 2025 The MITRE Corporation. This work is reproduced and distributed
+with the permission of The MITRE Corporation.
+
+MITRE ATLAS™ data is sourced from:
+https://github.com/mitre-atlas/atlas-data (v5.5.0)
+Licensed under the Apache License, Version 2.0.
+
+MITRE ATLAS™ and ATLAS™ are trademarks of The MITRE Corporation.
+ATT&CK® is a registered trademark of The MITRE Corporation.
+
+This project is an independent community visualization tool and is NOT
+endorsed by, affiliated with, or sponsored by The MITRE Corporation.
+
+References to OWASP Top 10 for LLM Applications are used for
+educational purposes. OWASP® is a registered trademark of the
+OWASP Foundation.

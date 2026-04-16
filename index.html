@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MITRE ATLAS™ Interactive Matrix · AI Attack Simulator</title>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; } body { background: #070a11; overflow-x: hidden; }</style>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-type="module">
+const { useState, useMemo, useCallback, useEffect } = React;
+
+
+const ATLAS_DATA = {"tactics": [{"id": "AML.TA0002", "name": "Reconnaissance", "desc": "The adversary is trying to gather information about the AI system they can use to plan future operations."}, {"id": "AML.TA0003", "name": "Resource Development", "desc": "The adversary is trying to establish resources they can use to support operations."}, {"id": "AML.TA0004", "name": "Initial Access", "desc": "The adversary is trying to gain access to the AI system."}, {"id": "AML.TA0000", "name": "AI Model Access", "desc": "The adversary is attempting to gain some level of access to an AI model."}, {"id": "AML.TA0005", "name": "Execution", "desc": "The adversary is trying to run malicious code embedded in AI artifacts or software."}, {"id": "AML.TA0006", "name": "Persistence", "desc": "The adversary is trying to maintain their foothold via AI artifacts or software."}, {"id": "AML.TA0012", "name": "Privilege Escalation", "desc": "The adversary is trying to gain higher-level permissions."}, {"id": "AML.TA0007", "name": "Defense Evasion", "desc": "The adversary is trying to avoid being detected by AI-enabled security software."}, {"id": "AML.TA0013", "name": "Credential Access", "desc": "The adversary is trying to steal account names and passwords."}, {"id": "AML.TA0008", "name": "Discovery", "desc": "The adversary is trying to figure out your AI environment."}, {"id": "AML.TA0015", "name": "Lateral Movement", "desc": "The adversary is trying to move through your AI environment."}, {"id": "AML.TA0009", "name": "Collection", "desc": "The adversary is trying to gather AI artifacts and other related information relevant to their goal."}, {"id": "AML.TA0001", "name": "AI Attack Staging", "desc": "The adversary is leveraging their knowledge of and access to the target system to tailor the attack."}, {"id": "AML.TA0014", "name": "Command and Control", "desc": "The adversary is trying to communicate with compromised AI systems to control them."}, {"id": "AML.TA0010", "name": "Exfiltration", "desc": "The adversary is trying to steal AI artifacts or other information about the AI system."}, {"id": "AML.TA0011", "name": "Impact", "desc": "The adversary is trying to manipulate, interrupt, erode confidence in, or destroy your AI systems and data."}], "techniques": [{"id": "AML.T0000", "name": "Search Open Technical Databases", "tactics": ["AML.TA0002"], "desc": "Adversaries may search for publicly available research and technical documentation to learn how and where AI is used within a victim organization.", "subs": [{"id": "AML.T0000.000", "name": "Journals and Conference Proceedings"}, {"id": "AML.T0000.001", "name": "Pre-Print Repositories"}, {"id": "AML.T0000.002", "name": "Technical Blogs"}]}, {"id": "AML.T0001", "name": "Search Open AI Vulnerability Analysis", "tactics": ["AML.TA0002"], "desc": "Adversaries may search for public AI vulnerability disclosures and analysis.", "subs": []}, {"id": "AML.T0003", "name": "Search Victim-Owned Websites", "tactics": ["AML.TA0002"], "desc": "Adversaries may search websites owned by the victim for information that can be used during targeting.", "subs": []}, {"id": "AML.T0004", "name": "Search Application Repositories", "tactics": ["AML.TA0002"], "desc": "Adversaries may search open application repositories during targeting.", "subs": []}, {"id": "AML.T0006", "name": "Active Scanning", "tactics": ["AML.TA0002"], "desc": "An adversary may probe or scan the victim system to gather information for targeting.", "subs": []}, {"id": "AML.T0002", "name": "Acquire Public AI Artifacts", "tactics": ["AML.TA0003"], "desc": "Adversaries may search public sources to identify AI artifacts.", "subs": [{"id": "AML.T0002.000", "name": "Datasets"}, {"id": "AML.T0002.001", "name": "Models"}]}, {"id": "AML.T0016", "name": "Obtain Capabilities", "tactics": ["AML.TA0003"], "desc": "Adversaries may search for and obtain software capabilities for use in their operations.", "subs": [{"id": "AML.T0016.000", "name": "Adversarial AI Attack Implementations"}, {"id": "AML.T0016.001", "name": "Software Tools"}, {"id": "AML.T0016.002", "name": "Generative AI"}]}, {"id": "AML.T0017", "name": "Develop Capabilities", "tactics": ["AML.TA0003"], "desc": "Adversaries may develop their own capabilities to support operations.", "subs": [{"id": "AML.T0017.000", "name": "Adversarial AI Attacks"}]}, {"id": "AML.T0008", "name": "Acquire Infrastructure", "tactics": ["AML.TA0003"], "desc": "Adversaries may buy, lease, or rent infrastructure for use throughout their operation.", "subs": [{"id": "AML.T0008.000", "name": "AI Development Workspaces"}, {"id": "AML.T0008.001", "name": "Consumer Hardware"}, {"id": "AML.T0008.002", "name": "Domains"}, {"id": "AML.T0008.003", "name": "Physical Countermeasures"}, {"id": "AML.T0008.004", "name": "Serverless"}, {"id": "AML.T0008.005", "name": "AI Service Proxies"}]}, {"id": "AML.T0019", "name": "Publish Poisoned Datasets", "tactics": ["AML.TA0003"], "desc": "Adversaries may publish poisoned datasets for victim consumption.", "subs": []}, {"id": "AML.T0010", "name": "AI Supply Chain Compromise", "tactics": ["AML.TA0004"], "desc": "Adversaries may gain initial access by compromising the AI supply chain.", "subs": [{"id": "AML.T0010.000", "name": "Hardware"}, {"id": "AML.T0010.001", "name": "AI Software"}, {"id": "AML.T0010.002", "name": "Data"}, {"id": "AML.T0010.003", "name": "Model"}, {"id": "AML.T0010.004", "name": "Container Registry"}, {"id": "AML.T0010.005", "name": "AI Agent Tool"}]}, {"id": "AML.T0040", "name": "AI Model Inference API Access", "tactics": ["AML.TA0000"], "desc": "Adversaries may gain access to a model via legitimate access to the inference API.", "subs": []}, {"id": "AML.T0047", "name": "AI-Enabled Product or Service", "tactics": ["AML.TA0000"], "desc": "Adversaries may use a product or service that uses AI under the hood to gain access to the underlying model.", "subs": []}, {"id": "AML.T0041", "name": "Physical Environment Access", "tactics": ["AML.TA0000"], "desc": "Adversaries may exploit the physical environment for their attacks.", "subs": []}, {"id": "AML.T0044", "name": "Full AI Model Access", "tactics": ["AML.TA0000"], "desc": "Adversaries may gain full white-box access to an AI model.", "subs": []}, {"id": "AML.T0013", "name": "Discover AI Model Ontology", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover the ontology of an AI model's output space.", "subs": []}, {"id": "AML.T0014", "name": "Discover AI Model Family", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover the general family of model.", "subs": []}, {"id": "AML.T0020", "name": "Poison Training Data", "tactics": ["AML.TA0003", "AML.TA0006"], "desc": "Adversaries may poison datasets used by an AI model by modifying the underlying data or its labels.", "subs": []}, {"id": "AML.T0021", "name": "Establish Accounts", "tactics": ["AML.TA0003"], "desc": "Adversaries may create accounts with various services for use in targeting.", "subs": []}, {"id": "AML.T0005", "name": "Create Proxy AI Model", "tactics": ["AML.TA0001"], "desc": "Adversaries may obtain models to serve as proxies for the target model.", "subs": [{"id": "AML.T0005.000", "name": "Train Proxy via Gathered AI Artifacts"}, {"id": "AML.T0005.001", "name": "Train Proxy via Replication"}, {"id": "AML.T0005.002", "name": "Use Pre-Trained Model"}]}, {"id": "AML.T0007", "name": "Discover AI Artifacts", "tactics": ["AML.TA0008"], "desc": "Adversaries may search private sources to identify AI artifacts.", "subs": []}, {"id": "AML.T0011", "name": "User Execution", "tactics": ["AML.TA0005"], "desc": "An adversary may rely upon specific actions by a user to gain execution.", "subs": [{"id": "AML.T0011.000", "name": "Unsafe AI Artifacts"}, {"id": "AML.T0011.001", "name": "Malicious Package"}, {"id": "AML.T0011.002", "name": "Poisoned AI Agent Tool"}, {"id": "AML.T0011.003", "name": "Malicious Link"}]}, {"id": "AML.T0012", "name": "Valid Accounts", "tactics": ["AML.TA0004", "AML.TA0012"], "desc": "Adversaries may obtain and abuse credentials of existing accounts.", "subs": []}, {"id": "AML.T0015", "name": "Evade AI Model", "tactics": ["AML.TA0004", "AML.TA0007", "AML.TA0011"], "desc": "Adversaries may craft adversarial data to evade AI model detection.", "subs": []}, {"id": "AML.T0018", "name": "Manipulate AI Model", "tactics": ["AML.TA0006", "AML.TA0001"], "desc": "Adversaries may directly manipulate an AI model to change its behavior.", "subs": [{"id": "AML.T0018.000", "name": "Poison AI Model"}, {"id": "AML.T0018.001", "name": "Modify AI Model Architecture"}, {"id": "AML.T0018.002", "name": "Embed Malware"}]}, {"id": "AML.T0024", "name": "Exfiltration via AI Inference API", "tactics": ["AML.TA0010"], "desc": "Adversaries may exfiltrate private information via AI Model Inference API Access.", "subs": [{"id": "AML.T0024.000", "name": "Infer Training Data Membership"}, {"id": "AML.T0024.001", "name": "Invert AI Model"}, {"id": "AML.T0024.002", "name": "Extract AI Model"}]}, {"id": "AML.T0025", "name": "Exfiltration via Cyber Means", "tactics": ["AML.TA0010"], "desc": "Adversaries may exfiltrate AI artifacts via traditional cyber means.", "subs": []}, {"id": "AML.T0029", "name": "Denial of AI Service", "tactics": ["AML.TA0011"], "desc": "Adversaries may flood AI systems to degrade or shut down the service.", "subs": []}, {"id": "AML.T0046", "name": "Spamming AI System with Chaff Data", "tactics": ["AML.TA0011"], "desc": "Adversaries may spam AI systems with chaff data to increase detections.", "subs": []}, {"id": "AML.T0031", "name": "Erode AI Model Integrity", "tactics": ["AML.TA0011"], "desc": "Adversaries may degrade model performance with adversarial inputs over time.", "subs": []}, {"id": "AML.T0034", "name": "Cost Harvesting", "tactics": ["AML.TA0011"], "desc": "Adversaries may drive AI services beyond normal capacity to increase costs.", "subs": [{"id": "AML.T0034.000", "name": "Excessive Queries"}, {"id": "AML.T0034.001", "name": "Resource-Intensive Queries"}, {"id": "AML.T0034.002", "name": "Agentic Resource Consumption"}]}, {"id": "AML.T0035", "name": "AI Artifact Collection", "tactics": ["AML.TA0009"], "desc": "Adversaries may collect AI artifacts for exfiltration.", "subs": []}, {"id": "AML.T0036", "name": "Data from Information Repositories", "tactics": ["AML.TA0009"], "desc": "Adversaries may leverage information repositories to mine valuable information.", "subs": []}, {"id": "AML.T0037", "name": "Data from Local System", "tactics": ["AML.TA0009"], "desc": "Adversaries may search local system sources to find files of interest.", "subs": []}, {"id": "AML.T0042", "name": "Verify Attack", "tactics": ["AML.TA0001"], "desc": "Adversaries can verify the efficacy of their attack via an inference API or offline model copy.", "subs": []}, {"id": "AML.T0043", "name": "Craft Adversarial Data", "tactics": ["AML.TA0001"], "desc": "Adversarial data are inputs modified to cause the adversary's desired effect in the target model.", "subs": [{"id": "AML.T0043.000", "name": "White-Box Optimization"}, {"id": "AML.T0043.001", "name": "Black-Box Optimization"}, {"id": "AML.T0043.002", "name": "Black-Box Transfer"}, {"id": "AML.T0043.003", "name": "Manual Modification"}, {"id": "AML.T0043.004", "name": "Insert Backdoor Trigger"}]}, {"id": "AML.T0048", "name": "External Harms", "tactics": ["AML.TA0011"], "desc": "Adversaries may cause harms external to the victim system.", "subs": [{"id": "AML.T0048.000", "name": "Financial Harm"}, {"id": "AML.T0048.001", "name": "Reputational Harm"}, {"id": "AML.T0048.002", "name": "Societal Harm"}, {"id": "AML.T0048.003", "name": "User Harm"}, {"id": "AML.T0048.004", "name": "AI Intellectual Property Theft"}]}, {"id": "AML.T0049", "name": "Exploit Public-Facing Application", "tactics": ["AML.TA0004"], "desc": "Adversaries may exploit weaknesses in Internet-facing applications.", "subs": []}, {"id": "AML.T0050", "name": "Command and Scripting Interpreter", "tactics": ["AML.TA0005"], "desc": "Adversaries may abuse command and script interpreters to execute commands.", "subs": []}, {"id": "AML.T0051", "name": "LLM Prompt Injection", "tactics": ["AML.TA0005"], "desc": "An adversary may craft malicious prompts that cause the LLM to act in unintended ways.", "subs": [{"id": "AML.T0051.000", "name": "Direct"}, {"id": "AML.T0051.001", "name": "Indirect"}, {"id": "AML.T0051.002", "name": "Triggered"}]}, {"id": "AML.T0052", "name": "Phishing", "tactics": ["AML.TA0004", "AML.TA0015"], "desc": "Adversaries may send phishing messages to gain access to victim systems.", "subs": [{"id": "AML.T0052.000", "name": "Spearphishing via Social Engineering LLM"}]}, {"id": "AML.T0053", "name": "AI Agent Tool Invocation", "tactics": ["AML.TA0005", "AML.TA0012"], "desc": "Adversaries may invoke tools an AI agent has access to.", "subs": []}, {"id": "AML.T0054", "name": "LLM Jailbreak", "tactics": ["AML.TA0012", "AML.TA0007"], "desc": "An adversary may target the inputs or architecture of an LLM to bypass controls.", "subs": []}, {"id": "AML.T0055", "name": "Unsecured Credentials", "tactics": ["AML.TA0013"], "desc": "Adversaries may search compromised systems for insecurely stored credentials.", "subs": []}, {"id": "AML.T0056", "name": "Extract LLM System Prompt", "tactics": ["AML.TA0010"], "desc": "Adversaries may attempt to extract an LLM's system prompt.", "subs": []}, {"id": "AML.T0057", "name": "LLM Data Leakage", "tactics": ["AML.TA0010"], "desc": "Adversaries may craft prompts that induce the LLM to leak sensitive information.", "subs": []}, {"id": "AML.T0058", "name": "Publish Poisoned Models", "tactics": ["AML.TA0003"], "desc": "Adversaries may publish a poisoned model to a public registry.", "subs": []}, {"id": "AML.T0059", "name": "Erode Dataset Integrity", "tactics": ["AML.TA0011"], "desc": "Adversaries may poison portions of a dataset to reduce usefulness.", "subs": []}, {"id": "AML.T0060", "name": "Publish Hallucinated Entities", "tactics": ["AML.TA0003"], "desc": "Adversaries may create entities hallucinated by an LLM.", "subs": []}, {"id": "AML.T0061", "name": "LLM Prompt Self-Replication", "tactics": ["AML.TA0006"], "desc": "An adversary may craft self-replicating prompt injections.", "subs": []}, {"id": "AML.T0062", "name": "Discover LLM Hallucinations", "tactics": ["AML.TA0008"], "desc": "Adversaries may prompt LLMs to identify hallucinated entities.", "subs": []}, {"id": "AML.T0063", "name": "Discover AI Model Outputs", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover unintended model outputs.", "subs": []}, {"id": "AML.T0064", "name": "Gather RAG-Indexed Targets", "tactics": ["AML.TA0002"], "desc": "Adversaries may identify data sources used in RAG systems.", "subs": []}, {"id": "AML.T0065", "name": "LLM Prompt Crafting", "tactics": ["AML.TA0003"], "desc": "Adversaries may craft prompts that bypass AI system defenses.", "subs": []}, {"id": "AML.T0066", "name": "Retrieval Content Crafting", "tactics": ["AML.TA0003"], "desc": "Adversaries may write content designed to be retrieved and influence users.", "subs": []}, {"id": "AML.T0067", "name": "LLM Trusted Output Components Manipulation", "tactics": ["AML.TA0007"], "desc": "Adversaries may manipulate LLM response components to appear trustworthy.", "subs": [{"id": "AML.T0067.000", "name": "Citations"}]}, {"id": "AML.T0068", "name": "LLM Prompt Obfuscation", "tactics": ["AML.TA0007"], "desc": "Adversaries may obfuscate prompt injections to avoid detection.", "subs": []}, {"id": "AML.T0069", "name": "Discover LLM System Information", "tactics": ["AML.TA0008"], "desc": "Adversaries may try to discover LLM system information.", "subs": [{"id": "AML.T0069.000", "name": "Special Character Sets"}, {"id": "AML.T0069.001", "name": "System Instruction Keywords"}, {"id": "AML.T0069.002", "name": "System Prompt"}]}, {"id": "AML.T0070", "name": "RAG Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may inject malicious content into RAG-indexed data.", "subs": []}, {"id": "AML.T0071", "name": "False RAG Entry Injection", "tactics": ["AML.TA0007"], "desc": "Adversaries may introduce false entries into RAG databases.", "subs": []}, {"id": "AML.T0072", "name": "Reverse Shell", "tactics": ["AML.TA0014"], "desc": "Adversaries may utilize a reverse shell to control the victim system.", "subs": []}, {"id": "AML.T0073", "name": "Impersonation", "tactics": ["AML.TA0007"], "desc": "Adversaries may impersonate trusted entities.", "subs": []}, {"id": "AML.T0074", "name": "Masquerading", "tactics": ["AML.TA0007"], "desc": "Adversaries may manipulate artifact features to appear legitimate.", "subs": []}, {"id": "AML.T0075", "name": "Cloud Service Discovery", "tactics": ["AML.TA0008"], "desc": "Adversaries may enumerate cloud services on a system.", "subs": []}, {"id": "AML.T0076", "name": "Corrupt AI Model", "tactics": ["AML.TA0007"], "desc": "An adversary may corrupt a model file to evade detection by scanners.", "subs": []}, {"id": "AML.T0077", "name": "LLM Response Rendering", "tactics": ["AML.TA0010"], "desc": "An adversary may get an LLM to include hidden data in rendered responses.", "subs": []}, {"id": "AML.T0078", "name": "Drive-by Compromise", "tactics": ["AML.TA0004"], "desc": "Adversaries may gain access through normal browsing activity.", "subs": []}, {"id": "AML.T0079", "name": "Stage Capabilities", "tactics": ["AML.TA0003"], "desc": "Adversaries may upload or install capabilities for targeting.", "subs": []}, {"id": "AML.T0080", "name": "AI Agent Context Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may manipulate an AI agent's context to influence its behavior.", "subs": [{"id": "AML.T0080.000", "name": "Memory"}, {"id": "AML.T0080.001", "name": "Thread"}]}, {"id": "AML.T0081", "name": "Modify AI Agent Configuration", "tactics": ["AML.TA0006", "AML.TA0007"], "desc": "Adversaries may modify AI agent configuration files.", "subs": []}, {"id": "AML.T0082", "name": "RAG Credential Harvesting", "tactics": ["AML.TA0013"], "desc": "Adversaries may use LLM access to collect credentials from RAG data.", "subs": []}, {"id": "AML.T0083", "name": "Credentials from AI Agent Configuration", "tactics": ["AML.TA0013"], "desc": "Adversaries may access credentials from AI agent configuration.", "subs": []}, {"id": "AML.T0084", "name": "Discover AI Agent Configuration", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover AI agent configuration information.", "subs": [{"id": "AML.T0084.000", "name": "Embedded Knowledge"}, {"id": "AML.T0084.001", "name": "Tool Definitions"}, {"id": "AML.T0084.002", "name": "Activation Triggers"}, {"id": "AML.T0084.003", "name": "Call Chains"}]}, {"id": "AML.T0085", "name": "Data from AI Services", "tactics": ["AML.TA0009"], "desc": "Adversaries may collect sensitive information from AI-enabled services.", "subs": [{"id": "AML.T0085.000", "name": "RAG Databases"}, {"id": "AML.T0085.001", "name": "AI Agent Tools"}]}, {"id": "AML.T0086", "name": "Exfiltration via AI Agent Tool Invocation", "tactics": ["AML.TA0010"], "desc": "Agent tools may be invoked to exfiltrate data.", "subs": []}, {"id": "AML.T0087", "name": "Gather Victim Identity Information", "tactics": ["AML.TA0002"], "desc": "Adversaries may gather victim identity information for targeting.", "subs": []}, {"id": "AML.T0088", "name": "Generate Deepfakes", "tactics": ["AML.TA0001"], "desc": "Adversaries may use GenAI to create synthetic media.", "subs": []}, {"id": "AML.T0089", "name": "Process Discovery", "tactics": ["AML.TA0008"], "desc": "Adversaries may get information about running processes.", "subs": []}, {"id": "AML.T0090", "name": "OS Credential Dumping", "tactics": ["AML.TA0013"], "desc": "Adversaries may extract credentials from OS caches or memory.", "subs": []}, {"id": "AML.T0091", "name": "Use Alternate Authentication Material", "tactics": ["AML.TA0015"], "desc": "Adversaries may use alternate auth material to move laterally.", "subs": [{"id": "AML.T0091.000", "name": "Application Access Token"}]}, {"id": "AML.T0092", "name": "Manipulate User LLM Chat History", "tactics": ["AML.TA0007"], "desc": "Adversaries may manipulate LLM chat history to cover tracks.", "subs": []}, {"id": "AML.T0093", "name": "Prompt Infiltration via Public-Facing Application", "tactics": ["AML.TA0004", "AML.TA0006"], "desc": "Adversaries may introduce malicious prompts via public-facing applications.", "subs": []}, {"id": "AML.T0094", "name": "Delay Execution of LLM Instructions", "tactics": ["AML.TA0007"], "desc": "Adversaries may include time-delayed instructions to evade detection.", "subs": []}, {"id": "AML.T0095", "name": "Search Open Websites/Domains", "tactics": ["AML.TA0002"], "desc": "Adversaries may search public websites for victim information.", "subs": []}, {"id": "AML.T0096", "name": "AI Service API", "tactics": ["AML.TA0014"], "desc": "Adversaries may communicate using the API of an AI service.", "subs": []}, {"id": "AML.T0097", "name": "Virtualization/Sandbox Evasion", "tactics": ["AML.TA0007"], "desc": "Adversaries may detect and avoid virtualization environments.", "subs": []}, {"id": "AML.T0098", "name": "AI Agent Tool Credential Harvesting", "tactics": ["AML.TA0013"], "desc": "Adversaries may use AI agent access to harvest credentials from tools.", "subs": []}, {"id": "AML.T0099", "name": "AI Agent Tool Data Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may place malicious content retrievable by AI Agent Tools.", "subs": []}, {"id": "AML.T0100", "name": "AI Agent Clickbait", "tactics": ["AML.TA0005"], "desc": "Adversaries may craft deceptive content to bait AI agents.", "subs": []}, {"id": "AML.T0101", "name": "Data Destruction via AI Agent Tool Invocation", "tactics": ["AML.TA0011"], "desc": "Adversaries may invoke agent tools to perform data destruction.", "subs": []}, {"id": "AML.T0102", "name": "Generate Malicious Commands", "tactics": ["AML.TA0001"], "desc": "Adversaries may use LLMs to generate malicious commands from natural language.", "subs": []}, {"id": "AML.T0103", "name": "Deploy AI Agent", "tactics": ["AML.TA0005"], "desc": "Adversaries may launch AI agents in the victim's environment.", "subs": []}, {"id": "AML.T0104", "name": "Publish Poisoned AI Agent Tool", "tactics": ["AML.TA0003"], "desc": "Adversaries may create and publish poisoned AI agent tools.", "subs": []}, {"id": "AML.T0105", "name": "Escape to Host", "tactics": ["AML.TA0012"], "desc": "Adversaries may break out of containers to access the underlying host.", "subs": []}, {"id": "AML.T0106", "name": "Exploitation for Credential Access", "tactics": ["AML.TA0013"], "desc": "Adversaries may exploit vulnerabilities to collect credentials.", "subs": []}, {"id": "AML.T0107", "name": "Exploitation for Defense Evasion", "tactics": ["AML.TA0007"], "desc": "Adversaries may exploit vulnerabilities to bypass security features.", "subs": []}, {"id": "AML.T0108", "name": "AI Agent", "tactics": ["AML.TA0014"], "desc": "Adversaries may abuse AI agents for command and control.", "subs": []}, {"id": "AML.T0109", "name": "AI Supply Chain Rug Pull", "tactics": ["AML.TA0007"], "desc": "Adversaries may publish legitimate AI components then push malicious updates.", "subs": []}, {"id": "AML.T0110", "name": "AI Agent Tool Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may poison tools used by AI agents including MCP connections.", "subs": []}, {"id": "AML.T0111", "name": "AI Supply Chain Reputation Inflation", "tactics": ["AML.TA0007"], "desc": "Building credible trust signals to increase perceived legitimacy of AI supply chain components.", "subs": []}, {"id": "AML.T0112", "name": "Machine Compromise", "tactics": ["AML.TA0011"], "desc": "Adversaries may compromise a machine via AI-enabled components.", "subs": [{"id": "AML.T0112.000", "name": "Local AI Agent"}, {"id": "AML.T0112.001", "name": "AI Artifacts"}]}]};
+
+const TC = {
+  "AML.TA0002": { bg: "#0d1f33", border: "#3b82f6", glow: "#3b82f622" },
+  "AML.TA0003": { bg: "#0d2629", border: "#06b6d4", glow: "#06b6d422" },
+  "AML.TA0004": { bg: "#2a0d0d", border: "#ef4444", glow: "#ef444422" },
+  "AML.TA0000": { bg: "#2a0d24", border: "#ec4899", glow: "#ec489922" },
+  "AML.TA0005": { bg: "#2a1a0d", border: "#f59e0b", glow: "#f59e0b22" },
+  "AML.TA0006": { bg: "#1f0d2a", border: "#a855f7", glow: "#a855f722" },
+  "AML.TA0012": { bg: "#2a2a0d", border: "#eab308", glow: "#eab30822" },
+  "AML.TA0007": { bg: "#0d2a1a", border: "#22c55e", glow: "#22c55e22" },
+  "AML.TA0013": { bg: "#2a1f0d", border: "#f97316", glow: "#f9731622" },
+  "AML.TA0008": { bg: "#0d1a2a", border: "#38bdf8", glow: "#38bdf822" },
+  "AML.TA0015": { bg: "#1a2a0d", border: "#84cc16", glow: "#84cc1622" },
+  "AML.TA0009": { bg: "#2a0d15", border: "#f43f5e", glow: "#f43f5e22" },
+  "AML.TA0001": { bg: "#1a0d2a", border: "#8b5cf6", glow: "#8b5cf622" },
+  "AML.TA0014": { bg: "#0d0d2a", border: "#6366f1", glow: "#6366f122" },
+  "AML.TA0010": { bg: "#2a260d", border: "#d97706", glow: "#d9770622" },
+  "AML.TA0011": { bg: "#2a0f0f", border: "#dc2626", glow: "#dc262622" },
+};
+
+const PHASES = [
+  { label: "PREPARATION", ids: ["AML.TA0002","AML.TA0003"], color: "#3b82f6" },
+  { label: "ENTRY", ids: ["AML.TA0004","AML.TA0000"], color: "#ef4444" },
+  { label: "EXEC & PERSIST", ids: ["AML.TA0005","AML.TA0006","AML.TA0012"], color: "#f59e0b" },
+  { label: "STEALTH & ACCESS", ids: ["AML.TA0007","AML.TA0013","AML.TA0008"], color: "#22c55e" },
+  { label: "MOVEMENT", ids: ["AML.TA0015","AML.TA0009"], color: "#84cc16" },
+  { label: "ATTACK OPS", ids: ["AML.TA0001","AML.TA0014"], color: "#8b5cf6" },
+  { label: "OBJECTIVES", ids: ["AML.TA0010","AML.TA0011"], color: "#dc2626" },
+];
+
+// === AI SIMULATION ENGINE (multi-provider) ===
+function buildPrompt(tech, allTechs, tactics, useFewShot = false) {
+  const techList = allTechs.map(t => `${t.id}: ${t.name} [tactics: ${t.tactics.join(", ")}]`).join("\n");
+  const tacticList = tactics.map(t => `${t.id}: ${t.name}`).join("\n");
+
+  // Base prompt used for both modes
+  const basePrompt = `You are an AI Security instructor using the MITRE ATLAS framework. The user selected technique: "${tech.id}: ${tech.name}" (${tech.desc}).
+
+Available ATLAS tactics (in kill-chain order):
+${tacticList}
+
+Available techniques:
+${techList}
+
+Generate a realistic attack scenario that includes the selected technique. Return ONLY valid JSON (no markdown, no backticks):
+{
+  "title": "Short attack scenario name (max 8 words)",
+  "scenario": "2-3 sentence scenario description of what the attacker wants to achieve",
+  "attack_path": [
+    {"tactic_id": "AML.TAxxxx", "technique_id": "AML.Txxxx", "technique_name": "...", "step_description": "1 sentence what attacker does at this step"}
+  ],
+  "example": "A concrete practical example showing how this specific attack could happen (3-4 sentences, with realistic details)",
+  "defense": "Key mitigation strategy in 1-2 sentences",
+  "severity": "critical|high|medium"
+}
+
+Rules:
+- attack_path must have 3-6 steps following the kill-chain order
+- The selected technique MUST be included in the path
+- Use ONLY real ATLAS technique IDs from the list above
+- example should be practical and educational, not just theory`;
+
+  if (!useFewShot) return basePrompt;
+
+  // Few-shot version for smaller local models (Ollama) — adds AI-native guidance + a concrete example
+  return `${basePrompt}
+
+CRITICAL GUIDANCE - This is MITRE ATLAS, not classical ATT&CK:
+- Scenarios MUST be AI-native, not generic IT attacks
+- Avoid "generic phishing → steal password → reverse shell" style chains. That's ATT&CK Enterprise, not ATLAS.
+- Focus on AI-specific targets: ML models, training data, RAG systems, AI agents, LLM system prompts, MLOps infrastructure (Weights & Biases, MLflow, HuggingFace, model registries)
+- Victims should be: data scientists, ML engineers, AI product teams, organizations using LLMs or AI agents
+- Examples must mention SPECIFIC things: real tool names (wandb, MLflow, Pinecone, LangChain), real model families (GPT, Llama, Claude), real attack artifacts (poisoned embeddings, jailbreak prompts, backdoor triggers)
+- Defenses should be AI-specific: model scanning, prompt filtering, RAG input validation, MLOps access controls — NOT just "enable MFA"
+
+EXAMPLE of the quality level expected (for reference only, DO NOT copy this):
+
+{
+  "title": "MLOps Supply Chain Attack on Medical AI",
+  "scenario": "An adversary targets data scientists at a medical AI company to gain access to their machine learning training infrastructure and proprietary diagnostic models. The attacker crafts convincing phishing emails that appear to come from the company's MLOps platform, tricking employees into revealing credentials that provide access to model repositories and training systems.",
+  "attack_path": [
+    {"tactic_id": "AML.TA0002", "technique_id": "AML.T0003", "technique_name": "Search Victim-Owned Websites", "step_description": "Attacker researches the target company's AI team structure, MLOps tools, and employee names from careers page, blog posts, and GitHub repositories to craft targeted phishing content."},
+    {"tactic_id": "AML.TA0003", "technique_id": "AML.T0008", "technique_name": "Acquire Infrastructure", "step_description": "Attacker registers a lookalike domain mimicking the company's MLflow or Weights & Biases instance and sets up a fake login page that captures credentials."},
+    {"tactic_id": "AML.TA0004", "technique_id": "AML.T0052", "technique_name": "Phishing", "step_description": "Attacker sends spear-phishing emails to data scientists claiming their model training run failed and requires re-authentication, with a link to the fake MLOps login page."},
+    {"tactic_id": "AML.TA0000", "technique_id": "AML.T0044", "technique_name": "Full AI Model Access", "step_description": "Using stolen credentials, attacker logs into the legitimate MLOps platform and gains full access to trained models, training scripts, and datasets."},
+    {"tactic_id": "AML.TA0009", "technique_id": "AML.T0035", "technique_name": "AI Artifact Collection", "step_description": "Attacker downloads proprietary model weights, training datasets, and configuration files from the model registry and experiment tracking system."},
+    {"tactic_id": "AML.TA0010", "technique_id": "AML.T0025", "technique_name": "Exfiltration via Cyber Means", "step_description": "Attacker exfiltrates the stolen AI artifacts to an external cloud storage bucket under their control for analysis or sale to competitors."}
+  ],
+  "example": "A cybercriminal group targets researchers at a medical AI startup developing diagnostic models. They send emails appearing to be from the company's Weights & Biases instance with subject lines like 'Your GPU training job exceeded quota - Action Required.' The emails direct victims to a cloned login page at 'wandb-company.com' instead of the legitimate 'company.wandb.io'. When a senior ML engineer enters their credentials, the attackers gain access to the real platform, download a proprietary cancer detection model worth millions in R&D investment, and sell it on dark web forums to competitors in countries with weak IP enforcement.",
+  "defense": "Implement multi-factor authentication on all ML infrastructure access points, conduct regular security awareness training specific to AI development workflows, and deploy email filtering that detects domain spoofing and suspicious links targeting MLOps platforms.",
+  "severity": "high"
+}
+
+Now generate a similar quality scenario for the user's selected technique "${tech.id}: ${tech.name}". DO NOT reuse the example above — create something genuinely different but at the same level of specificity and AI-native detail. Return ONLY the JSON.`;
+}
+
+function extractJSON(text) {
+  // Remove markdown fences and extract JSON block
+  let clean = text.replace(/```json|```/g, "").trim();
+  // If there's text before/after the JSON, try to extract it
+  const match = clean.match(/\{[\s\S]*\}/);
+  if (match) clean = match[0];
+  return JSON.parse(clean);
+}
+
+async function runSimulation(tech, allTechs, tactics, config) {
+  const { provider, apiKey, ollamaUrl, ollamaModel, cloudModel } = config;
+  // Use few-shot enriched prompt only for Ollama (smaller local models benefit hugely)
+  // Claude and GPT already know ATLAS well enough without examples
+  const prompt = buildPrompt(tech, allTechs, tactics, provider === "ollama");
+
+  if (provider === "anthropic") {
+    if (!apiKey) throw new Error("Anthropic API key required. Open settings (⚙) to add it.");
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: cloudModel || "claude-sonnet-4-5",
+        max_tokens: 1500,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    if (!r.ok) {
+      const err = await r.text();
+      if (r.status === 401) throw new Error("Anthropic: Invalid API key. Check your key in settings (⚙). Make sure it starts with 'sk-ant-'.");
+      if (r.status === 429) throw new Error("Anthropic: Rate limit exceeded. Wait a moment and try again.");
+      if (r.status === 404) throw new Error(`Anthropic: Model "${cloudModel}" not found. Try a different model in settings (⚙).`);
+      throw new Error(`Anthropic API error (${r.status}): ${err.slice(0, 200)}`);
+    }
+    const data = await r.json();
+    const text = data.content?.map(i => i.text || "").join("") || "";
+    return extractJSON(text);
+  }
+
+  if (provider === "openai") {
+    if (!apiKey) throw new Error("OpenAI API key required. Open settings (⚙) to add it.");
+    const model = cloudModel || "gpt-4o-mini";
+    // Newer models (o1, o3, gpt-4o, chatgpt-4o) use max_completion_tokens; older use max_tokens
+    const isReasoning = /^(o1|o3)/.test(model);
+    const usesNewTokenParam = /^(o1|o3|gpt-4o|chatgpt-4o)/.test(model);
+    const body = {
+      model,
+      messages: [{ role: "user", content: prompt }],
+    };
+    // Apply the correct token limit parameter
+    if (usesNewTokenParam) {
+      body.max_completion_tokens = 1500;
+    } else {
+      body.max_tokens = 1500;
+    }
+    if (!isReasoning) body.response_format = { type: "json_object" };
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) {
+      const err = await r.text();
+      if (r.status === 401) throw new Error("OpenAI: Invalid API key. Check your key in settings (⚙).");
+      if (r.status === 429) throw new Error("OpenAI: Rate limit exceeded. Wait a moment and try again.");
+      if (r.status === 404) throw new Error(`OpenAI: Model "${model}" not found. You may not have access to it — try a different model in settings (⚙).`);
+      throw new Error(`OpenAI API error (${r.status}): ${err.slice(0, 200)}`);
+    }
+    const data = await r.json();
+    const text = data.choices?.[0]?.message?.content || "";
+    return extractJSON(text);
+  }
+
+  if (provider === "ollama") {
+    const url = (ollamaUrl || "http://localhost:11434").replace(/\/$/, "");
+    const model = ollamaModel || "llama3.2";
+    const r = await fetch(`${url}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "user", content: prompt }],
+        stream: false,
+        format: "json",
+        options: {
+          temperature: config.temperature ?? 0.6,
+          top_p: config.topP ?? 0.9,
+          num_ctx: config.numCtx ?? 8192,
+          num_predict: config.numPredict ?? 2000,
+        },
+      }),
+    });
+    if (!r.ok) {
+      throw new Error(`Ollama error (${r.status}). Is Ollama running at ${url}?`);
+    }
+    const data = await r.json();
+    const text = data.message?.content || "";
+    return extractJSON(text);
+  }
+
+  throw new Error("No AI provider configured. Click ⚙ to set up.");
+}
+
+// === DEFAULT OLLAMA TUNING ===
+const OLLAMA_DEFAULTS = {
+  temperature: 0.6,
+  topP: 0.9,
+  numCtx: 8192,
+  numPredict: 2000,
+};
+
+// Reusable slider with label, numeric input, and hint
+function TuningSlider({ label, value, onChange, min, max, step, hint, default: defaultVal, integer }) {
+  const isDefault = value === defaultVal;
+  const displayValue = integer ? Math.round(value) : value;
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+        <label style={{ fontSize: 10.5, color: "#cbd5e1", fontWeight: 600 }}>
+          {label}
+          {!isDefault && <span style={{ marginLeft: 6, fontSize: 9, color: "#f59e0b" }}>● modified</span>}
+        </label>
+        <input
+          type="number"
+          value={displayValue}
+          onChange={e => {
+            const v = integer ? parseInt(e.target.value) : parseFloat(e.target.value);
+            if (!isNaN(v)) onChange(Math.max(min, Math.min(max, v)));
+          }}
+          min={min} max={max} step={step}
+          style={{
+            background: "#070a11", border: "1px solid #1e293b", borderRadius: 4,
+            padding: "2px 6px", color: "#e2e8f0", fontSize: 10.5,
+            fontFamily: "'JetBrains Mono', monospace", outline: "none",
+            width: 70, textAlign: "right",
+          }}
+        />
+      </div>
+      <input
+        type="range"
+        value={value} onChange={e => onChange(parseFloat(e.target.value))}
+        min={min} max={max} step={step}
+        style={{
+          width: "100%", height: 4, cursor: "pointer",
+          accentColor: isDefault ? "#3b82f6" : "#f59e0b",
+        }}
+      />
+      <div style={{ fontSize: 9.5, color: "#64748b", marginTop: 3, lineHeight: 1.4 }}>{hint}</div>
+    </div>
+  );
+}
+
+// === SETTINGS MODAL ===
+// Fallback model lists in case API discovery fails
+const FALLBACK_CLOUD_MODELS = {
+  anthropic: [
+    "claude-opus-4-5",
+    "claude-sonnet-4-5",
+    "claude-haiku-4-5",
+    "claude-3-5-sonnet-latest",
+    "claude-3-5-haiku-latest",
+  ],
+  openai: [
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gpt-4-turbo",
+    "gpt-4",
+    "o1-mini",
+    "o3-mini",
+  ],
+};
+
+const DEFAULT_CLOUD_MODEL = {
+  anthropic: "claude-sonnet-4-5",
+  openai: "gpt-4o-mini",
+};
+
+function SettingsModal({ config, setConfig, onClose }) {
+  const [provider, setProvider] = useState(config.provider || "none");
+  const [apiKey, setApiKey] = useState(config.apiKey || "");
+  const [ollamaUrl, setOllamaUrl] = useState(config.ollamaUrl || "http://localhost:11434");
+  const [ollamaModel, setOllamaModel] = useState(config.ollamaModel || "llama3.2");
+  const [cloudModel, setCloudModel] = useState(
+    config.cloudModel || DEFAULT_CLOUD_MODEL[config.provider] || DEFAULT_CLOUD_MODEL.anthropic
+  );
+  const [showKey, setShowKey] = useState(false);
+
+  // Advanced tuning (Ollama only)
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [temperature, setTemperature] = useState(config.temperature ?? OLLAMA_DEFAULTS.temperature);
+  const [topP, setTopP] = useState(config.topP ?? OLLAMA_DEFAULTS.topP);
+  const [numCtx, setNumCtx] = useState(config.numCtx ?? OLLAMA_DEFAULTS.numCtx);
+  const [numPredict, setNumPredict] = useState(config.numPredict ?? OLLAMA_DEFAULTS.numPredict);
+
+  // Dynamic model list fetching (Ollama)
+  const [availableModels, setAvailableModels] = useState(null);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [testResult, setTestResult] = useState(null);
+  const [testing, setTesting] = useState(false);
+
+  // Dynamic cloud model fetching
+  const [cloudModels, setCloudModels] = useState(null); // null=not fetched, []=fallback
+  const [cloudFetching, setCloudFetching] = useState(false);
+  const [cloudFetchResult, setCloudFetchResult] = useState(null);
+
+  // When provider switches, reset cloud model to that provider's default (if user hasn't set one)
+  useEffect(() => {
+    if ((provider === "anthropic" || provider === "openai") && !config.cloudModel) {
+      setCloudModel(DEFAULT_CLOUD_MODEL[provider]);
+    }
+    setCloudModels(null);
+    setCloudFetchResult(null);
+  }, [provider]);
+
+  const fetchCloudModels = useCallback(async () => {
+    if (!apiKey) {
+      setCloudFetchResult({ ok: false, msg: "Enter your API key first." });
+      return;
+    }
+    setCloudFetching(true);
+    setCloudFetchResult(null);
+    try {
+      let models = [];
+      if (provider === "anthropic") {
+        const r = await fetch("https://api.anthropic.com/v1/models", {
+          headers: {
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        models = (data.data || [])
+          .map(m => m.id)
+          .filter(id => id && !id.includes("embedding"))
+          .sort();
+      } else if (provider === "openai") {
+        const r = await fetch("https://api.openai.com/v1/models", {
+          headers: { "Authorization": `Bearer ${apiKey}` },
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        // Filter to chat-capable models only (gpt-*, o1-*, o3-*, chatgpt-*)
+        models = (data.data || [])
+          .map(m => m.id)
+          .filter(id => id && /^(gpt-|o1-|o3-|chatgpt-)/.test(id))
+          .filter(id => !/embedding|whisper|tts|dall-e|davinci|babbage|moderation|realtime|audio|transcribe/.test(id))
+          .sort();
+      }
+
+      if (models.length === 0) {
+        setCloudModels(FALLBACK_CLOUD_MODELS[provider]);
+        setCloudFetchResult({ ok: true, msg: `No chat models returned. Showing common defaults.` });
+      } else {
+        setCloudModels(models);
+        setCloudFetchResult({ ok: true, msg: `Loaded ${models.length} available model${models.length !== 1 ? "s" : ""} from ${provider === "anthropic" ? "Anthropic" : "OpenAI"}.` });
+      }
+    } catch (e) {
+      setCloudModels(FALLBACK_CLOUD_MODELS[provider]);
+      setCloudFetchResult({ ok: false, msg: `Could not fetch models (${e.message}). Showing common defaults — your key still works.` });
+    }
+    setCloudFetching(false);
+  }, [provider, apiKey]);
+
+  const fetchModels = useCallback(async () => {
+    setLoadingModels(true);
+    setTestResult(null);
+    try {
+      const url = (ollamaUrl || "http://localhost:11434").replace(/\/$/, "");
+      const r = await fetch(`${url}/api/tags`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      const models = (data.models || []).map(m => m.name || m.model).filter(Boolean);
+      setAvailableModels(models);
+      if (models.length > 0 && !models.includes(ollamaModel)) {
+        setTestResult({ ok: true, msg: `Found ${models.length} model${models.length !== 1 ? "s" : ""}. Current "${ollamaModel}" not installed — pick one from the dropdown.` });
+      } else {
+        setTestResult({ ok: true, msg: `Connected. ${models.length} model${models.length !== 1 ? "s" : ""} installed.` });
+      }
+    } catch (e) {
+      setAvailableModels([]);
+      setTestResult({ ok: false, msg: `Cannot reach Ollama at ${ollamaUrl}. Is it running? Is OLLAMA_ORIGINS="*" set?` });
+    }
+    setLoadingModels(false);
+  }, [ollamaUrl, ollamaModel]);
+
+  const testConnection = useCallback(async () => {
+    setTesting(true);
+    await fetchModels();
+    setTesting(false);
+  }, [fetchModels]);
+
+  const resetTuning = () => {
+    setTemperature(OLLAMA_DEFAULTS.temperature);
+    setTopP(OLLAMA_DEFAULTS.topP);
+    setNumCtx(OLLAMA_DEFAULTS.numCtx);
+    setNumPredict(OLLAMA_DEFAULTS.numPredict);
+  };
+
+  const save = () => {
+    const newConfig = { provider, apiKey, ollamaUrl, ollamaModel, cloudModel, temperature, topP, numCtx, numPredict };
+    setConfig(newConfig);
+    try {
+      localStorage.setItem("atlas_sim_config", JSON.stringify(newConfig));
+    } catch (e) { console.warn("localStorage unavailable"); }
+    onClose();
+  };
+
+  const clearAll = () => {
+    if (!confirm("Clear all saved settings including API keys?")) return;
+    try { localStorage.removeItem("atlas_sim_config"); } catch (e) {}
+    const fresh = { provider: "none", apiKey: "", ollamaUrl: "http://localhost:11434", ollamaModel: "llama3.2", cloudModel: DEFAULT_CLOUD_MODEL.anthropic, ...OLLAMA_DEFAULTS };
+    setConfig(fresh);
+    setProvider("none"); setApiKey(""); setOllamaUrl("http://localhost:11434"); setOllamaModel("llama3.2");
+    setCloudModel(DEFAULT_CLOUD_MODEL.anthropic);
+    resetTuning();
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(6px)", animation: "fadeIn 0.2s ease" }}
+      onClick={onClose}>
+      <div onClick={e => e.stopPropagation()}
+        style={{ background: "#0e1420", border: "1px solid #1e293b", borderRadius: 10, padding: "20px 22px", maxWidth: 520, width: "100%", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18 }}>⚙</span>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0, letterSpacing: -0.3 }}>AI Simulation Settings</h2>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "1px solid #2a3040", color: "#7a8599", fontSize: 16, cursor: "pointer", borderRadius: 5, width: 28, height: 28 }}>✕</button>
+        </div>
+
+        <p style={{ fontSize: 11.5, color: "#94a3b8", lineHeight: 1.5, marginBottom: 14 }}>
+          Choose how Attack Simulations are powered. The matrix itself works without any AI — the simulate button needs one of these.
+        </p>
+
+        {/* Provider Selection */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 9, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Provider</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6 }}>
+            {[
+              { id: "none", label: "📖 None (matrix only)", desc: "Explore the data, no AI" },
+              { id: "ollama", label: "🦙 Local Ollama", desc: "Free, offline, private" },
+              { id: "anthropic", label: "🤖 Claude (your key)", desc: "Best quality, you pay" },
+              { id: "openai", label: "💠 OpenAI (your key)", desc: "GPT-4o-mini, you pay" },
+            ].map(opt => (
+              <div key={opt.id} onClick={() => setProvider(opt.id)}
+                style={{
+                  background: provider === opt.id ? "#3b82f618" : "#0a0e17",
+                  border: `1px solid ${provider === opt.id ? "#3b82f6" : "#1e293b"}`,
+                  borderRadius: 6, padding: "8px 10px", cursor: "pointer", transition: "all 0.15s",
+                }}>
+                <div style={{ fontSize: 11.5, fontWeight: 600, color: provider === opt.id ? "#fff" : "#cbd5e1", marginBottom: 2 }}>{opt.label}</div>
+                <div style={{ fontSize: 10, color: "#64748b" }}>{opt.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Provider-specific config */}
+        {(provider === "anthropic" || provider === "openai") && (
+          <div style={{ marginBottom: 14, padding: "12px 14px", background: "#0a0e17", border: "1px solid #1e293b", borderRadius: 7 }}>
+            <div style={{ fontSize: 9, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
+              {provider === "anthropic" ? "Anthropic" : "OpenAI"} API Key
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input type={showKey ? "text" : "password"} value={apiKey} onChange={e => { setApiKey(e.target.value); setCloudFetchResult(null); }}
+                placeholder={provider === "anthropic" ? "sk-ant-..." : "sk-..."}
+                style={{ flex: 1, background: "#070a11", border: "1px solid #1e293b", borderRadius: 5, padding: "7px 10px", color: "#e2e8f0", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", outline: "none" }} />
+              <button onClick={() => setShowKey(!showKey)}
+                style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 5, padding: "6px 10px", color: "#94a3b8", fontSize: 11, cursor: "pointer" }}>
+                {showKey ? "🙈" : "👁"}
+              </button>
+            </div>
+
+            {/* Model selection */}
+            <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <div style={{ fontSize: 9, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Model</div>
+              <button onClick={fetchCloudModels} disabled={cloudFetching || !apiKey}
+                style={{
+                  background: cloudFetching ? "#1e293b" : "linear-gradient(135deg, #22c55e15, #3b82f615)",
+                  border: `1px solid ${cloudFetching || !apiKey ? "#334155" : "#22c55e44"}`,
+                  color: cloudFetching || !apiKey ? "#64748b" : "#86efac",
+                  fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 4,
+                  cursor: cloudFetching ? "wait" : !apiKey ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", gap: 4,
+                }}>
+                {cloudFetching ? (<><span style={{ display: "inline-block", animation: "spin 1s linear infinite" }}>◌</span> Loading…</>) : "↻ Load available models"}
+              </button>
+            </div>
+
+            {cloudModels && cloudModels.length > 0 ? (
+              <select value={cloudModel} onChange={e => setCloudModel(e.target.value)}
+                style={{ width: "100%", background: "#070a11", border: "1px solid #1e293b", borderRadius: 5, padding: "7px 10px", color: "#e2e8f0", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", outline: "none", cursor: "pointer" }}>
+                {!cloudModels.includes(cloudModel) && <option value={cloudModel}>{cloudModel} (not in list)</option>}
+                {cloudModels.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            ) : (
+              <select value={cloudModel} onChange={e => setCloudModel(e.target.value)}
+                style={{ width: "100%", background: "#070a11", border: "1px solid #1e293b", borderRadius: 5, padding: "7px 10px", color: "#e2e8f0", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", outline: "none", cursor: "pointer" }}>
+                {!FALLBACK_CLOUD_MODELS[provider].includes(cloudModel) && <option value={cloudModel}>{cloudModel}</option>}
+                {FALLBACK_CLOUD_MODELS[provider].map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            )}
+
+            {cloudFetchResult && (
+              <div style={{
+                marginTop: 6, padding: "5px 9px",
+                background: cloudFetchResult.ok ? "#22c55e0a" : "#f59e0b12",
+                border: `1px solid ${cloudFetchResult.ok ? "#22c55e33" : "#f59e0b44"}`,
+                borderRadius: 5,
+                fontSize: 10, color: cloudFetchResult.ok ? "#86efac" : "#fbbf24", lineHeight: 1.4,
+              }}>
+                {cloudFetchResult.ok ? "✓ " : "⚠ "}{cloudFetchResult.msg}
+              </div>
+            )}
+
+            <div style={{ marginTop: 8, padding: "8px 10px", background: "#f59e0b0a", border: "1px solid #f59e0b22", borderRadius: 5 }}>
+              <div style={{ fontSize: 10.5, color: "#fbbf24", fontWeight: 700, marginBottom: 3 }}>🔒 How your key is handled</div>
+              <ul style={{ fontSize: 10, color: "#cbd5e1", lineHeight: 1.55, margin: 0, paddingLeft: 14 }}>
+                <li>Saved in this browser's <code style={{ fontFamily: "'JetBrains Mono', monospace", color: "#fbbf24" }}>localStorage</code> (persists across sessions — you won't need to re-enter it).</li>
+                <li>Sent <strong>directly</strong> from your browser to {provider === "anthropic" ? "Anthropic" : "OpenAI"} over HTTPS. No server of ours in between.</li>
+                <li>Not encrypted — anyone with physical access to this device, malicious browser extensions, or the same browser profile can read it. Standard <code style={{ fontFamily: "'JetBrains Mono', monospace", color: "#fbbf24" }}>localStorage</code> behavior.</li>
+                <li>Use "Clear all data" below to remove it anytime.</li>
+              </ul>
+            </div>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 8 }}>
+              Get a key:{" "}
+              <a href={provider === "anthropic" ? "https://console.anthropic.com/settings/keys" : "https://platform.openai.com/api-keys"}
+                target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", textDecoration: "none" }}>
+                {provider === "anthropic" ? "console.anthropic.com" : "platform.openai.com"} ↗
+              </a>
+              {" · "}
+              Pricing varies by model
+            </div>
+          </div>
+        )}
+
+        {provider === "ollama" && (
+          <div style={{ marginBottom: 14, padding: "12px 14px", background: "#0a0e17", border: "1px solid #1e293b", borderRadius: 7 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <div style={{ fontSize: 9, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Ollama Server URL</div>
+              <button onClick={testConnection} disabled={testing}
+                style={{
+                  background: testing ? "#1e293b" : "linear-gradient(135deg, #22c55e15, #3b82f615)",
+                  border: `1px solid ${testing ? "#334155" : "#22c55e44"}`,
+                  color: testing ? "#64748b" : "#86efac",
+                  fontSize: 10, fontWeight: 600, padding: "3px 10px",
+                  borderRadius: 4, cursor: testing ? "wait" : "pointer",
+                  display: "flex", alignItems: "center", gap: 4,
+                }}>
+                {testing ? (<><span style={{ display: "inline-block", animation: "spin 1s linear infinite" }}>◌</span> Testing…</>) : "↻ Test connection"}
+              </button>
+            </div>
+            <input type="text" value={ollamaUrl} onChange={e => { setOllamaUrl(e.target.value); setTestResult(null); }}
+              style={{ width: "100%", background: "#070a11", border: "1px solid #1e293b", borderRadius: 5, padding: "7px 10px", color: "#e2e8f0", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", outline: "none", marginBottom: 10 }} />
+
+            {testResult && (
+              <div style={{
+                marginTop: -4, marginBottom: 10, padding: "6px 9px",
+                background: testResult.ok ? "#22c55e0a" : "#ef444412",
+                border: `1px solid ${testResult.ok ? "#22c55e33" : "#ef444444"}`,
+                borderRadius: 5,
+                fontSize: 10.5, color: testResult.ok ? "#86efac" : "#fca5a5", lineHeight: 1.4,
+              }}>
+                {testResult.ok ? "✓ " : "✗ "}{testResult.msg}
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <div style={{ fontSize: 9, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Model</div>
+              {availableModels && availableModels.length > 0 && (
+                <span style={{ fontSize: 9, color: "#64748b" }}>{availableModels.length} installed</span>
+              )}
+            </div>
+
+            {availableModels && availableModels.length > 0 ? (
+              <select value={ollamaModel} onChange={e => setOllamaModel(e.target.value)}
+                style={{ width: "100%", background: "#070a11", border: "1px solid #1e293b", borderRadius: 5, padding: "7px 10px", color: "#e2e8f0", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", outline: "none", cursor: "pointer" }}>
+                {!availableModels.includes(ollamaModel) && <option value={ollamaModel}>{ollamaModel} (not installed)</option>}
+                {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            ) : (
+              <input type="text" value={ollamaModel} onChange={e => setOllamaModel(e.target.value)}
+                placeholder="qwen2.5:7b, llama3.2, mistral, ..."
+                style={{ width: "100%", background: "#070a11", border: "1px solid #1e293b", borderRadius: 5, padding: "7px 10px", color: "#e2e8f0", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", outline: "none" }} />
+            )}
+
+            <div style={{ marginTop: 8, padding: "6px 9px", background: "#22c55e0a", border: "1px solid #22c55e22", borderRadius: 5 }}>
+              <div style={{ fontSize: 10, color: "#86efac", lineHeight: 1.5 }}>
+                🦙 <strong>Recommended:</strong> <code style={{ fontFamily: "'JetBrains Mono', monospace" }}>ollama pull qwen2.5:7b</code>.
+                Run Ollama with <code style={{ fontFamily: "'JetBrains Mono', monospace" }}>OLLAMA_ORIGINS="*"</code> so the browser can reach it.
+              </div>
+            </div>
+            <div style={{ marginTop: 6, padding: "6px 9px", background: "#3b82f60a", border: "1px solid #3b82f622", borderRadius: 5 }}>
+              <div style={{ fontSize: 10, color: "#93c5fd", lineHeight: 1.5 }}>
+                💡 <strong>Auto-enhanced prompting:</strong> Ollama mode uses few-shot examples to guide smaller local models toward AI-native attack scenarios (MLOps, RAG, LLM-specific), not generic IT attacks.
+              </div>
+            </div>
+
+            {/* ADVANCED TUNING (collapsible) */}
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #1e293b" }}>
+              <button onClick={() => setShowAdvanced(!showAdvanced)}
+                style={{
+                  background: "none", border: "none", color: "#94a3b8",
+                  fontSize: 10.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1,
+                  cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6, width: "100%",
+                }}>
+                <span style={{ transition: "transform 0.2s", transform: showAdvanced ? "rotate(90deg)" : "rotate(0deg)", display: "inline-block" }}>▸</span>
+                Advanced Tuning
+                {!showAdvanced && <span style={{ fontSize: 9, color: "#64748b", fontWeight: 500, textTransform: "none", letterSpacing: 0 }}>— temperature, top_p, context</span>}
+              </button>
+
+              {showAdvanced && (
+                <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10, animation: "fadeIn 0.2s ease" }}>
+                  {/* Temperature */}
+                  <TuningSlider
+                    label="Temperature"
+                    value={temperature}
+                    onChange={setTemperature}
+                    min={0} max={2} step={0.1}
+                    hint="Lower = more deterministic (0.3-0.6 good for JSON). Higher = more creative."
+                    default={OLLAMA_DEFAULTS.temperature}
+                  />
+                  {/* Top P */}
+                  <TuningSlider
+                    label="Top P"
+                    value={topP}
+                    onChange={setTopP}
+                    min={0} max={1} step={0.05}
+                    hint="Nucleus sampling. 0.9 = balanced. Lower = safer vocabulary."
+                    default={OLLAMA_DEFAULTS.topP}
+                  />
+                  {/* Num Context */}
+                  <TuningSlider
+                    label="Num Context"
+                    value={numCtx}
+                    onChange={setNumCtx}
+                    min={2048} max={32768} step={1024}
+                    hint="Max tokens the model can read. 8192 fits the ATLAS data + example. Bigger = more VRAM."
+                    default={OLLAMA_DEFAULTS.numCtx}
+                    integer
+                  />
+                  {/* Num Predict */}
+                  <TuningSlider
+                    label="Num Predict"
+                    value={numPredict}
+                    onChange={setNumPredict}
+                    min={500} max={8192} step={100}
+                    hint="Max tokens the model can generate. Too low = truncated JSON."
+                    default={OLLAMA_DEFAULTS.numPredict}
+                    integer
+                  />
+                  <button onClick={resetTuning}
+                    style={{ alignSelf: "flex-start", background: "none", border: "1px solid #334155", color: "#94a3b8", fontSize: 10, padding: "4px 10px", borderRadius: 4, cursor: "pointer", fontWeight: 600 }}>
+                    ↺ Reset to defaults
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {provider === "none" && (
+          <div style={{ marginBottom: 14, padding: "10px 12px", background: "#3b82f60a", border: "1px solid #3b82f622", borderRadius: 7 }}>
+            <div style={{ fontSize: 11, color: "#93c5fd", lineHeight: 1.5 }}>
+              📖 Matrix-only mode. You can still explore all 16 tactics, 101 techniques, and their sub-techniques. The ⚡ Simulate button will be hidden.
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
+          <button onClick={clearAll}
+            style={{ background: "none", border: "1px solid #7f1d1d", color: "#f87171", fontSize: 11, padding: "7px 12px", borderRadius: 5, cursor: "pointer", fontWeight: 600 }}>
+            Clear all data
+          </button>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={onClose}
+              style={{ background: "none", border: "1px solid #334155", color: "#94a3b8", fontSize: 11, padding: "7px 14px", borderRadius: 5, cursor: "pointer", fontWeight: 600 }}>
+              Cancel
+            </button>
+            <button onClick={save}
+              style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)", border: "none", color: "#fff", fontSize: 11, padding: "7px 18px", borderRadius: 5, cursor: "pointer", fontWeight: 700, letterSpacing: 0.3 }}>
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// === COMPONENTS ===
+function TechCard({ tech, color, isSelected, onClick, idx, isHighlighted }) {
+  const [hovered, setHovered] = useState(false);
+  const num = tech.id.replace("AML.T", "");
+  const hasSubs = tech.subs && tech.subs.length > 0;
+  const isActive = hovered && !isSelected;
+  const glowing = isHighlighted && !isSelected;
+
+  // Dynamic font sizing based on name length to prevent overflow on hover
+  const nameLen = tech.name.length;
+  // Find longest single word — breaks on hyphens/slashes/spaces
+  const longestWord = tech.name.split(/[\s\-\/]/).reduce((m, w) => w.length > m ? w.length : m, 0);
+
+  let hoverNameSize = 12;
+  if (nameLen > 40 || longestWord > 14) hoverNameSize = 10;
+  else if (nameLen > 30 || longestWord > 12) hoverNameSize = 10.5;
+  else if (nameLen > 22) hoverNameSize = 11;
+
+  return (
+    <div onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      style={{
+        background: isSelected ? color.border + "18" : glowing ? color.border + "20" : isActive ? color.border + "15" : color.bg,
+        border: `${isActive ? 2 : 1.5}px solid ${isSelected || isActive || glowing ? color.border : color.border + "40"}`,
+        borderRadius: 6,
+        padding: isActive ? "9px 11px" : "5px 7px",
+        cursor: "pointer",
+        minHeight: isActive ? 68 : 48,
+        display: "flex", flexDirection: "column", justifyContent: "space-between",
+        animation: glowing ? "pathPulse 1.5s ease infinite" : `fadeIn 0.25s ease ${idx * 0.015}s both`,
+        boxShadow: isSelected
+          ? `0 0 14px ${color.glow}, inset 0 0 18px ${color.glow}`
+          : glowing
+          ? `0 0 16px ${color.border}44, 0 0 30px ${color.border}22`
+          : isActive
+          ? `0 0 18px ${color.border}55, 0 8px 26px rgba(0,0,0,0.55), inset 0 0 20px ${color.glow}`
+          : "none",
+        position: "relative",
+        zIndex: isActive ? 10 : isSelected ? 5 : glowing ? 4 : 1,
+        transform: isActive ? "scale(1.22)" : isSelected ? "scale(1.03)" : glowing ? "scale(1.05)" : "scale(1)",
+        transformOrigin: "center center",
+        overflow: "hidden",
+        transition: "transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), min-height 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.22s ease, border-color 0.15s ease, border-width 0.15s ease, box-shadow 0.2s ease, background 0.15s ease",
+      }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 3 }}>
+        <span style={{ fontSize: isActive ? 11 : 8.5, color: color.border, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: 0.3, transition: "font-size 0.2s ease" }}>T{num}</span>
+        {hasSubs && <span style={{ fontSize: isActive ? 8.5 : 7, background: color.border + "28", color: color.border, padding: isActive ? "2px 6px" : "1px 4px", borderRadius: 3, fontWeight: 700, lineHeight: isActive ? "16px" : "14px", transition: "all 0.2s ease" }}>{tech.subs.length}</span>}
+        {glowing && <span style={{ fontSize: 7, background: "#ff475744", color: "#ff6b7a", padding: "1px 4px", borderRadius: 3, fontWeight: 700, lineHeight: "14px" }}>PATH</span>}
+      </div>
+      <div style={{
+        fontSize: isActive ? hoverNameSize : 9.5,
+        color: isActive ? "#fff" : glowing ? "#fff" : "#dde4ed",
+        fontWeight: isActive || glowing ? 600 : 500,
+        lineHeight: 1.22,
+        letterSpacing: -0.2,
+        marginTop: isActive ? 4 : 2,
+        wordBreak: "break-word",
+        overflowWrap: "anywhere",
+        hyphens: "auto",
+        transition: "font-size 0.2s ease, color 0.15s ease, margin-top 0.2s ease",
+      }}>{tech.name}</div>
+    </div>
+  );
+}
+
+function SimPanel({ sim, onClose, color }) {
+  if (!sim) return null;
+  const sevColors = { critical: "#ef4444", high: "#f59e0b", medium: "#3b82f6" };
+  const sevC = sevColors[sim.severity] || "#3b82f6";
+  return (
+    <div style={{ marginTop: 14, background: "#0a0e1799", border: "1px solid #1e293b", borderRadius: 8, padding: "16px 18px", animation: "fadeIn 0.3s ease" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 16 }}>⚡</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#fff", letterSpacing: -0.3 }}>{sim.title}</span>
+          <span style={{ fontSize: 10, background: sevC + "22", color: sevC, padding: "3px 10px", borderRadius: 4, fontWeight: 700, border: `1px solid ${sevC}44`, textTransform: "uppercase", letterSpacing: 0.5 }}>{sim.severity}</span>
+          {sim._autoInjected && (
+            <span title="The model did not include the selected technique in its path. It was auto-inserted."
+              style={{ fontSize: 9.5, background: "#f59e0b18", color: "#fbbf24", padding: "3px 10px", borderRadius: 4, fontWeight: 700, border: "1px solid #f59e0b44", letterSpacing: 0.3, cursor: "help" }}>
+              ⚠ AUTO-CORRECTED
+            </span>
+          )}
+        </div>
+      </div>
+
+      {sim._autoInjected && (
+        <div style={{ marginBottom: 12, padding: "8px 11px", background: "#f59e0b0a", border: "1px solid #f59e0b33", borderRadius: 6, display: "flex", alignItems: "flex-start", gap: 8 }}>
+          <span style={{ fontSize: 14, flexShrink: 0 }}>⚠</span>
+          <p style={{ fontSize: 11.5, color: "#fbbf24", lineHeight: 1.5, margin: 0 }}>
+            The model generated a path that <strong>did not include the selected technique</strong>. One retry was attempted and failed, so the technique was auto-inserted into the most appropriate position. This is a common limitation of smaller local models — consider trying a larger model or a cloud provider for better instruction-following.
+          </p>
+        </div>
+      )}
+
+      <p style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.6, marginBottom: 16 }}>{sim.scenario}</p>
+
+      {/* Attack Path */}
+      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Attack Kill Chain</div>
+      <div style={{ display: "flex", gap: 0, alignItems: "stretch", flexWrap: "wrap", marginBottom: 16 }}>
+        {sim.attack_path.map((step, i) => {
+          const stepColor = TC[step.tactic_id]?.border || "#6366f1";
+          const tacticName = ATLAS_DATA.tactics.find(t => t.id === step.tactic_id)?.name || "";
+          const isInjected = sim._autoInjected && step.step_description?.includes("auto-inserted");
+          return (
+            <div key={i} style={{ display: "flex", alignItems: "stretch" }}>
+              <div style={{
+                background: stepColor + "12",
+                border: `${isInjected ? "2px dashed" : "1px solid"} ${stepColor}${isInjected ? "88" : "44"}`,
+                borderRadius: 6, padding: "10px 12px", minWidth: 160, maxWidth: 210,
+                position: "relative",
+              }}>
+                {isInjected && (
+                  <span style={{ position: "absolute", top: -8, right: 6, fontSize: 8.5, background: "#f59e0b", color: "#000", padding: "1px 6px", borderRadius: 3, fontWeight: 800, letterSpacing: 0.5 }}>INSERTED</span>
+                )}
+                <div style={{ fontSize: 9.5, color: stepColor, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 }}>{tacticName}</div>
+                <div style={{ fontSize: 12, color: "#e2e8f0", fontWeight: 600, lineHeight: 1.25, marginBottom: 5 }}>{step.technique_name}</div>
+                <div style={{ fontSize: 11.5, color: "#94a3b8", lineHeight: 1.4 }}>{step.step_description}</div>
+                <div style={{ fontSize: 9.5, color: stepColor + "99", fontFamily: "'JetBrains Mono', monospace", marginTop: 5, fontWeight: 600 }}>{step.technique_id}</div>
+              </div>
+              {i < sim.attack_path.length - 1 && (
+                <div style={{ display: "flex", alignItems: "center", padding: "0 4px", color: "#475569", fontSize: 16 }}>→</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Example */}
+      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Practical Example</div>
+      <div style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 6, padding: "12px 14px", marginBottom: 12 }}>
+        <p style={{ fontSize: 13.5, color: "#e2e8f0", lineHeight: 1.6, margin: 0 }}>{sim.example}</p>
+      </div>
+
+      {/* Defense */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "#22c55e0a", border: "1px solid #22c55e22", borderRadius: 6, padding: "10px 12px" }}>
+        <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>🛡</span>
+        <p style={{ fontSize: 13, color: "#86efac", lineHeight: 1.5, margin: 0 }}>{sim.defense}</p>
+      </div>
+    </div>
+  );
+}
+
+function DetailPanel({ tech, tacticName, color, onClose, highlightedTechs, setHighlightedTechs, config, onOpenSettings }) {
+  const [sim, setSim] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const num = tech.id.replace("AML.T", "");
+  const aiEnabled = config.provider && config.provider !== "none";
+
+  const handleSimulate = useCallback(async () => {
+    setLoading(true); setError(null); setSim(null); setHighlightedTechs([]);
+    try {
+      let result = await runSimulation(tech, ATLAS_DATA.techniques, ATLAS_DATA.tactics, config);
+      let pathIds = (result.attack_path || []).map(s => s.technique_id);
+
+      // Hard-enforcement: the selected technique MUST be in the path.
+      // Local models (even good ones) often ignore this rule. We retry once with
+      // a stricter prompt, then auto-inject + flag if it still fails.
+      const techInPath = pathIds.some(id => id === tech.id || id.startsWith(tech.id + "."));
+      if (!techInPath) {
+        console.warn(`[ATLAS] Selected technique ${tech.id} missing from generated path. Retrying…`);
+        try {
+          // Retry with stricter config (lower temp for more compliant output)
+          const retryConfig = { ...config, temperature: 0.3 };
+          result = await runSimulation(tech, ATLAS_DATA.techniques, ATLAS_DATA.tactics, retryConfig);
+          pathIds = (result.attack_path || []).map(s => s.technique_id);
+        } catch (e) {
+          console.warn("[ATLAS] Retry failed, keeping original result.", e);
+        }
+
+        // Check again after retry
+        const stillMissing = !pathIds.some(id => id === tech.id || id.startsWith(tech.id + "."));
+        if (stillMissing) {
+          // Inject the selected technique at a sensible position based on its tactic.
+          // Tactics list is already in kill-chain order, so we position by tactic index.
+          const tacticOrder = ATLAS_DATA.tactics.map(t => t.id);
+          const targetTacticIdx = tech.tactics && tech.tactics.length > 0
+            ? tacticOrder.indexOf(tech.tactics[0])
+            : -1;
+
+          const injected = {
+            tactic_id: tech.tactics?.[0] || "AML.TA0005",
+            technique_id: tech.id,
+            technique_name: tech.name,
+            step_description: `Attacker leverages ${tech.name.toLowerCase()} as part of the attack (auto-inserted — the model did not include this technique in its generated path).`,
+          };
+
+          // Find the right insertion index based on kill-chain order
+          const path = [...(result.attack_path || [])];
+          let insertIdx = path.length; // default: end
+          for (let i = 0; i < path.length; i++) {
+            const stepTacticIdx = tacticOrder.indexOf(path[i].tactic_id);
+            if (stepTacticIdx > targetTacticIdx) { insertIdx = i; break; }
+          }
+          path.splice(insertIdx, 0, injected);
+          result = { ...result, attack_path: path, _autoInjected: true };
+          pathIds = path.map(s => s.technique_id);
+        } else {
+          result = { ...result, _retrySucceeded: true };
+        }
+      }
+
+      setSim(result);
+      setHighlightedTechs(pathIds);
+    } catch (e) {
+      setError(e.message || "Simulation failed — try again.");
+      console.error(e);
+    }
+    setLoading(false);
+  }, [tech, setHighlightedTechs, config]);
+
+  return (
+    <div style={{
+      position: "fixed", bottom: 0, left: 0, right: 0,
+      background: "linear-gradient(to top, #080c14, #0e1420)",
+      borderTop: `2px solid ${color.border}`,
+      padding: "16px 24px", zIndex: 1000, animation: "slideUp 0.2s ease",
+      boxShadow: `0 -6px 30px rgba(0,0,0,0.6), 0 -2px 12px ${color.glow}`,
+      maxHeight: "65vh", overflowY: "auto",
+    }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 5 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, color: color.border, fontWeight: 700 }}>T{num}</span>
+              <span style={{ fontSize: 20, color: "#fff", fontWeight: 700, letterSpacing: -0.3 }}>{tech.name}</span>
+            </div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 7, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 12, background: color.border + "18", color: color.border, padding: "3px 11px", borderRadius: 4, fontWeight: 600, border: `1px solid ${color.border}33` }}>{tacticName}</span>
+              <span style={{ fontSize: 12, color: "#7a8599", fontFamily: "'JetBrains Mono', monospace" }}>{tech.id}</span>
+            </div>
+            {tech.desc && <p style={{ fontSize: 13.5, color: "#cbd5e1", lineHeight: 1.55, margin: "5px 0 10px", maxWidth: 800 }}>{tech.desc}</p>}
+          </div>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
+            {/* SIMULATE BUTTON - only if AI is configured */}
+            {aiEnabled ? (
+              <button onClick={handleSimulate} disabled={loading}
+                style={{
+                  background: loading ? "#1e293b" : "linear-gradient(135deg, #f59e0b22, #ef444422)",
+                  border: `1px solid ${loading ? "#334155" : "#f59e0b66"}`,
+                  color: loading ? "#64748b" : "#fbbf24", fontSize: 11, fontWeight: 700,
+                  padding: "6px 14px", borderRadius: 6, cursor: loading ? "wait" : "pointer",
+                  display: "flex", alignItems: "center", gap: 6,
+                  transition: "all 0.2s", letterSpacing: 0.3,
+                }}
+                onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = "linear-gradient(135deg, #f59e0b33, #ef444433)"; e.currentTarget.style.borderColor = "#f59e0b"; }}}
+                onMouseLeave={e => { if (!loading) { e.currentTarget.style.background = "linear-gradient(135deg, #f59e0b22, #ef444422)"; e.currentTarget.style.borderColor = "#f59e0b66"; }}}
+              >
+                {loading ? (<><span style={{ display: "inline-block", animation: "spin 1s linear infinite", fontSize: 13 }}>◌</span> Simulating...</>) : (<>⚡ Attack Simulation</>)}
+              </button>
+            ) : (
+              <button onClick={onOpenSettings}
+                style={{
+                  background: "none", border: "1px dashed #475569",
+                  color: "#94a3b8", fontSize: 11, fontWeight: 600,
+                  padding: "6px 14px", borderRadius: 6, cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 6,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.color = "#3b82f6"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#475569"; e.currentTarget.style.color = "#94a3b8"; }}
+              >
+                ⚙ Enable AI Simulation
+              </button>
+            )}
+            <button onClick={() => { onClose(); setHighlightedTechs([]); setSim(null); }}
+              style={{ background: "none", border: "1px solid #2a3040", color: "#7a8599", fontSize: 16, cursor: "pointer", borderRadius: 5, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#2a3040"; e.currentTarget.style.color = "#7a8599"; }}
+            >✕</button>
+          </div>
+        </div>
+
+        {/* Sub-techniques */}
+        {tech.subs && tech.subs.length > 0 && (
+          <div style={{ marginBottom: 6 }}>
+            <div style={{ fontSize: 10, color: "#7a8599", marginBottom: 4, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Sub-Techniques ({tech.subs.length})</div>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {tech.subs.map(sub => (
+                <a key={sub.id} href={`https://atlas.mitre.org/techniques/${sub.id}`} target="_blank" rel="noopener noreferrer"
+                  style={{ background: color.bg, border: `1px solid ${color.border}44`, borderRadius: 5, padding: "4px 9px", fontSize: 10.5, color: "#bcc5d3", fontWeight: 500, textDecoration: "none", transition: "border-color 0.15s" }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = color.border}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = color.border + "44"}
+                >
+                  <span style={{ color: color.border, fontFamily: "'JetBrains Mono', monospace", fontSize: 9, marginRight: 4 }}>{sub.id}</span>{sub.name}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <a href={`https://atlas.mitre.org/techniques/${tech.id}`} target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: 11, color: color.border, textDecoration: "none", fontWeight: 600 }}>View on ATLAS ↗</a>
+
+        {/* Simulation Result */}
+        {error && <div style={{ marginTop: 10, padding: "8px 12px", background: "#ef444418", border: "1px solid #ef444444", borderRadius: 6, color: "#fca5a5", fontSize: 12 }}>{error}</div>}
+        {sim && <SimPanel sim={sim} color={color} onClose={() => { setSim(null); setHighlightedTechs([]); }} />}
+      </div>
+    </div>
+  );
+}
+
+// === MAIN ===
+function ATLASMatrix() {
+  const [selectedTech, setSelectedTech] = useState(null);
+  const [selectedTactic, setSelectedTactic] = useState(null);
+  const [filter, setFilter] = useState("");
+  const [hoveredTactic, setHoveredTactic] = useState(null);
+  const [highlightedTechs, setHighlightedTechs] = useState([]);
+  const [showSettings, setShowSettings] = useState(false);
+  const [config, setConfig] = useState({ provider: "none", apiKey: "", ollamaUrl: "http://localhost:11434", ollamaModel: "llama3.2", cloudModel: "claude-sonnet-4-5", temperature: 0.6, topP: 0.9, numCtx: 8192, numPredict: 2000 });
+
+  // Load saved config from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("atlas_sim_config");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setConfig(c => ({ ...c, ...parsed }));
+      }
+    } catch (e) { console.warn("Could not load config from localStorage"); }
+  }, []);
+
+  const techsByTactic = useMemo(() => {
+    const map = {};
+    ATLAS_DATA.tactics.forEach(t => { map[t.id] = []; });
+    ATLAS_DATA.techniques.forEach(tech => { tech.tactics.forEach(tid => { if (map[tid]) map[tid].push(tech); }); });
+    // Sort alphabetically within each tactic to match the official ATLAS matrix layout
+    Object.keys(map).forEach(tid => { map[tid].sort((a, b) => a.name.localeCompare(b.name)); });
+    return map;
+  }, []);
+
+  const filteredTechs = useMemo(() => {
+    if (!filter) return null;
+    const q = filter.toLowerCase();
+    return ATLAS_DATA.techniques.filter(t => t.name.toLowerCase().includes(q) || t.id.toLowerCase().includes(q) || (t.subs && t.subs.some(s => s.name.toLowerCase().includes(q))));
+  }, [filter]);
+
+  const totalTechs = ATLAS_DATA.techniques.length;
+  const totalSubs = ATLAS_DATA.techniques.reduce((a, t) => a + (t.subs?.length || 0), 0);
+
+  const handleSelectTech = (tech, tacticId) => {
+    if (selectedTech?.id === tech.id && selectedTactic === tacticId) {
+      setSelectedTech(null); setSelectedTactic(null); setHighlightedTechs([]);
+    } else {
+      setSelectedTech(tech); setSelectedTactic(tacticId);
+    }
+  };
+
+  const activeTacticName = selectedTactic ? ATLAS_DATA.tactics.find(t => t.id === selectedTactic)?.name : "";
+  const activeColor = selectedTactic ? TC[selectedTactic] : null;
+
+  return (
+    <div style={{ background: "#070a11", minHeight: "100vh", color: "#dde4ed", fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" }}>
+      <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet" />
+      <style>{`
+        @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+        @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+        @keyframes pathPulse { 0%,100% { opacity:0.85; } 50% { opacity:1; } }
+        ::-webkit-scrollbar { width:5px; height:5px; }
+        ::-webkit-scrollbar-track { background:#070a11; }
+        ::-webkit-scrollbar-thumb { background:#1a2030; border-radius:3px; }
+      `}</style>
+
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 999, background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(100,200,255,0.005) 3px, rgba(100,200,255,0.005) 4px)" }} />
+
+      {/* Header */}
+      <div style={{ background: "linear-gradient(180deg, #0c1018, #070a11)", borderBottom: "1px solid #151d2e", padding: "14px 20px 10px", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: 1800, margin: "0 auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 10 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
+                <span style={{ fontFamily: "'Orbitron', monospace", fontSize: 22, fontWeight: 900, background: "linear-gradient(135deg, #3b82f6, #ec4899, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 2 }}>MITRE ATLAS</span>
+                <span style={{ fontSize: 9, background: "#dc262615", color: "#dc2626", padding: "2px 7px", borderRadius: 4, fontWeight: 700, border: "1px solid #dc262630", fontFamily: "'JetBrains Mono', monospace" }}>v5.5.0</span>
+                <span style={{
+                  fontSize: 9,
+                  background: config.provider === "none" ? "#64748b15" : "#22c55e15",
+                  color: config.provider === "none" ? "#64748b" : "#22c55e",
+                  padding: "2px 7px", borderRadius: 4, fontWeight: 700,
+                  border: `1px solid ${config.provider === "none" ? "#64748b30" : "#22c55e30"}`,
+                  fontFamily: "'JetBrains Mono', monospace"
+                }}>
+                  {config.provider === "none" ? "📖 MATRIX ONLY" : "⚡ AI SIM ON"}
+                </span>
+              </div>
+              <div style={{ fontSize: 11, color: "#5a6577", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600 }}>Interactive Matrix · Optional AI-Powered Attack Simulation</div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 14 }}>
+                {[{ n: 16, l: "Tactics" }, { n: totalTechs, l: "Techniques" }, { n: totalSubs, l: "Sub-Techs" }].map(s => (
+                  <div key={s.l} style={{ textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 16, fontWeight: 700, color: "#e0e6ed" }}>{s.n}</div>
+                    <div style={{ fontSize: 8, color: "#5a6577", textTransform: "uppercase", letterSpacing: 1 }}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ position: "relative" }}>
+                <input type="text" placeholder="Search techniques..." value={filter} onChange={e => setFilter(e.target.value)}
+                  style={{ background: "#0e1420", border: "1px solid #1a2235", borderRadius: 6, padding: "7px 10px 7px 28px", color: "#dde4ed", fontSize: 12, width: 200, outline: "none", fontFamily: "inherit" }}
+                  onFocus={e => e.target.style.borderColor = "#3b82f6"} onBlur={e => e.target.style.borderColor = "#1a2235"} />
+                <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "#5a6577", fontSize: 13 }}>⌕</span>
+              </div>
+              <button onClick={() => setShowSettings(true)}
+                title="AI Simulation Settings"
+                style={{
+                  background: config.provider && config.provider !== "none" ? "linear-gradient(135deg, #22c55e18, #3b82f618)" : "#0e1420",
+                  border: `1px solid ${config.provider && config.provider !== "none" ? "#22c55e44" : "#1a2235"}`,
+                  borderRadius: 6, padding: "7px 10px", color: config.provider && config.provider !== "none" ? "#86efac" : "#94a3b8",
+                  fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontWeight: 600,
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#3b82f6"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = config.provider && config.provider !== "none" ? "#22c55e44" : "#1a2235"; }}>
+                ⚙ {config.provider === "anthropic" ? "Claude" : config.provider === "openai" ? "OpenAI" : config.provider === "ollama" ? "Ollama" : "Setup AI"}
+              </button>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 2, marginTop: 10, overflow: "auto" }}>
+            {PHASES.map(g => (
+              <div key={g.label} style={{ flex: g.ids.length, textAlign: "center", padding: "3px 4px", background: g.color + "0a", borderTop: `2px solid ${g.color}`, borderRadius: "3px 3px 0 0" }}>
+                <span style={{ fontSize: 7.5, fontWeight: 700, color: g.color, letterSpacing: 1.2, textTransform: "uppercase" }}>{g.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Search */}
+      {filter && filteredTechs && (
+        <div style={{ padding: "12px 20px", borderBottom: "1px solid #151d2e", maxWidth: 1800, margin: "0 auto" }}>
+          <div style={{ fontSize: 11, color: "#5a6577", marginBottom: 8 }}><span style={{ color: "#3b82f6", fontWeight: 700 }}>{filteredTechs.length}</span> results</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {filteredTechs.map((tech, i) => {
+              const c = TC[tech.tactics[0]] || TC["AML.TA0002"];
+              return (<div key={tech.id + i} onClick={() => { handleSelectTech(tech, tech.tactics[0]); setFilter(""); }}
+                style={{ background: c.bg, border: `1px solid ${c.border}44`, borderRadius: 5, padding: "5px 9px", cursor: "pointer", fontSize: 10.5, color: "#bcc5d3", transition: "all 0.12s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = c.border} onMouseLeave={e => e.currentTarget.style.borderColor = c.border + "44"}>
+                <span style={{ color: c.border, fontFamily: "'JetBrains Mono',monospace", fontSize: 8.5, marginRight: 5 }}>{tech.id}</span>{tech.name}
+              </div>);
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Matrix */}
+      <div style={{ overflowX: "auto", padding: "0 20px 140px", maxWidth: 1800, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${ATLAS_DATA.tactics.length}, minmax(108px, 1fr))`, gap: 3, paddingTop: 6 }}>
+          {ATLAS_DATA.tactics.map((tactic, ti) => {
+            const color = TC[tactic.id];
+            const cnt = techsByTactic[tactic.id]?.length || 0;
+            const isFirst = ti === 0;
+            const isLast = ti === ATLAS_DATA.tactics.length - 1;
+            // Align tooltip edge to tactic header edge at the extremes to avoid viewport clipping
+            const tooltipAlign = isFirst
+              ? { left: 0, transform: "none" }
+              : isLast
+              ? { right: 0, left: "auto", transform: "none" }
+              : { left: "50%", transform: "translateX(-50%)" };
+            return (
+              <div key={tactic.id} style={{ background: `linear-gradient(180deg, ${color.border}15 0%, ${color.bg} 100%)`, borderTop: `3px solid ${color.border}`, borderRadius: "5px 5px 0 0", padding: "8px 6px 7px", textAlign: "center", cursor: "default", animation: `fadeIn 0.25s ease ${ti * 0.03}s both`, position: "relative", zIndex: hoveredTactic === tactic.id ? 60 : 1 }}
+                onMouseEnter={() => setHoveredTactic(tactic.id)} onMouseLeave={() => setHoveredTactic(null)}>
+                <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: color.border, fontWeight: 600, marginBottom: 2, opacity: 0.75 }}>{tactic.id}</div>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: "#e0e8f0", lineHeight: 1.15, marginBottom: 3 }}>{tactic.name}</div>
+                <div style={{ fontSize: 8, color: color.border, fontWeight: 600, opacity: 0.6 }}>{cnt} technique{cnt !== 1 ? "s" : ""}</div>
+                {hoveredTactic === tactic.id && (
+                  <div style={{ position: "absolute", top: "calc(100% + 4px)", ...tooltipAlign, background: "#111827ee", border: `1px solid ${color.border}33`, borderRadius: 6, padding: "8px 11px", width: 220, zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.5)", fontSize: 10.5, color: "#9ca3af", lineHeight: 1.4, textAlign: "left", backdropFilter: "blur(6px)" }}>
+                    {tactic.desc}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {ATLAS_DATA.tactics.map(tactic => {
+            const color = TC[tactic.id];
+            const techs = techsByTactic[tactic.id] || [];
+            return (
+              <div key={tactic.id + "-col"} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {techs.map((tech, ti) => (
+                  <TechCard key={tech.id + tactic.id} tech={tech} color={color} idx={ti} tacticId={tactic.id}
+                    isSelected={selectedTech?.id === tech.id && selectedTactic === tactic.id}
+                    isHighlighted={highlightedTechs.includes(tech.id)}
+                    onClick={() => handleSelectTech(tech, tactic.id)} />
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Legend - stays fixed at bottom-right, fades out when panel opens */}
+      <div style={{
+        position: "fixed",
+        bottom: 10,
+        right: 14,
+        background: "#0e1420ee",
+        border: "1px solid #1a2235",
+        borderRadius: 7,
+        padding: "8px 12px",
+        zIndex: 99,
+        backdropFilter: "blur(6px)",
+        opacity: selectedTech ? 0 : 1,
+        pointerEvents: selectedTech ? "none" : "auto",
+        transition: "opacity 0.2s ease",
+      }}>
+        <div style={{ fontSize: 8, color: "#5a6577", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Legend</div>
+        {[
+          { c: "#3b82f6", l: "Click card → details" },
+          { c: "#f59e0b", l: "⚡ Simulate → AI attack path" },
+          { c: "#ff4757", l: "PATH = highlighted kill chain" },
+        ].map(({ c, l }) => (
+          <div key={l} style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 1, background: c, flexShrink: 0 }} />
+            <span style={{ fontSize: 9, color: "#7a8599" }}>{l}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Source credit - stays fixed at bottom-left, fades out when panel opens */}
+      <div style={{
+        position: "fixed",
+        bottom: 10,
+        left: 14,
+        fontSize: 8,
+        color: "#2a3344",
+        fontFamily: "'JetBrains Mono',monospace",
+        zIndex: 99,
+        opacity: selectedTech ? 0 : 1,
+        pointerEvents: selectedTech ? "none" : "auto",
+        transition: "opacity 0.2s ease",
+      }}>
+        © 2025 The MITRE Corporation · ATLAS™ v5.5.0 · Apache 2.0 · Visualization is not endorsed by MITRE
+      </div>
+
+      {selectedTech && activeColor && (
+        <DetailPanel tech={selectedTech} tacticName={activeTacticName} color={activeColor}
+          onClose={() => { setSelectedTech(null); setSelectedTactic(null); }}
+          highlightedTechs={highlightedTechs} setHighlightedTechs={setHighlightedTechs}
+          config={config} onOpenSettings={() => setShowSettings(true)} />
+      )}
+
+      {showSettings && (
+        <SettingsModal config={config} setConfig={setConfig} onClose={() => setShowSettings(false)} />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<ATLASMatrix />);
+</script>
+</body>
+</html>
