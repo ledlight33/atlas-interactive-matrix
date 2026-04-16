@@ -260,7 +260,7 @@ This tool is designed for **educational exploration**, not as a substitute for p
 
 **MITRE ATLAS™** is a trademark of The MITRE Corporation. This project reproduces ATLAS data with permission under the Apache License 2.0. This visualization is an independent community project and is **not endorsed by, affiliated with, or sponsored by The MITRE Corporation**.
 
-© 2025 The MITRE Corporation. ATLAS data reproduced and distributed with the permission of The MITRE Corporation.
+© 2025 The MITRE Corporation. ATLAS data reproduced and distributed under the Apache License 2.0.
 
 See [LICENSE](LICENSE) and [NOTICE](NOTICE) for full details.
 
