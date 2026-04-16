@@ -144,18 +144,41 @@ Click **⚙** → Select provider → Paste your API key → Click **↻ Load av
 
 ## Model Comparison
 
-We tested the same technique (T0054 LLM Jailbreak) across multiple models. Results reflect real-world quality differences:
+We tested the same technique (**T0054 LLM Jailbreak**) across four models to evaluate the quality of AI-generated attack simulations. Each model was asked to produce a realistic kill chain, practical example, and defense recommendation.
 
-| Criterion | Qwen 2.5 7B | Dolphin Mixtral | GPT-4o-mini | Claude Sonnet |
-|-----------|-------------|-----------------|-------------|---------------|
-| Selected technique in path | ⚠️ Needs retry | ✅ | ✅ | ✅ |
-| Tactic mapping accuracy | 2/5 | 4/5 | 5/5 | 6/6 |
+### What we measured
+
+- **Selected technique in path** — Did the model include the technique the user clicked on? This is an explicit rule in the prompt. Models that ignore it produce misleading scenarios.
+- **Tactic mapping accuracy** — Each attack path has N steps. We checked whether every step correctly maps the technique to the right ATLAS tactic. For example, "LLM Jailbreak" belongs to Privilege Escalation (TA0012) — if a model places it under Reconnaissance, that's a factual error. The score (e.g. 5/5) means "5 steps generated, all 5 tactic mappings were correct."
+- **AI-native specificity** — Does the scenario target AI-specific infrastructure (MLOps, RAG, LLMs, model registries), or is it a generic IT attack that could belong in ATT&CK Enterprise?
+- **Named techniques** — Does the practical example reference real attack methods (DAN personas, Unicode obfuscation, multi-turn escalation) or stay vague ("crafted prompts")?
+- **Quantified impact** — Does the scenario give concrete numbers ("1,000+ customer records") or just "sensitive data was stolen"?
+- **Defense quality** — Generic advice ("enable MFA") vs operational recommendations (red teaming cadence, audit logs, RAG input validation)?
+
+### Results
+
+| Criterion | Qwen 2.5 7B | Dolphin Mixtral | GPT-4o-mini | Claude Sonnet 4.5 |
+|-----------|-------------|-----------------|-------------|-------------------|
+| Selected technique in path | ⚠️ Needed retry | ✅ | ✅ | ✅ |
+| Tactic mapping accuracy | 2/5 correct | 4/5 correct | 5/5 correct | 6/6 correct |
 | AI-native specificity | Basic | Good | Good | Excellent |
-| Jailbreak techniques named | None | DAN | Generic | DAN, Unicode, multi-turn |
-| Concrete impact numbers | No | No | No | "1,000+ customers" |
-| Defense quality | Generic MFA | OK | OK | Red teaming + audit logs |
+| Named attack techniques | None | DAN | Generic | DAN, Unicode, multi-turn |
+| Quantified impact | No | No | No | Yes ("1,000+ customers") |
+| Defense quality | Generic MFA | Adequate | Adequate | Red teaming + audit logs |
 
-> **Key finding:** Local models benefit significantly from the built-in few-shot prompting but still lag behind frontier models in instruction-following and domain-specific reasoning. This tool transparently flags when auto-correction was applied.
+### What we achieved
+
+- **Built-in few-shot prompting** for Ollama significantly improved local model output compared to raw zero-shot prompts. Local models now reference MLOps tools, RAG systems, and LLM-specific attack surfaces instead of generic phishing chains.
+- **Hard-enforcement logic** ensures the selected technique always appears in the kill chain — even when the model ignores the instruction. When auto-correction is applied, the tool transparently flags it with an "AUTO-CORRECTED" warning.
+- **Dynamic model selection** across all providers means users can test and compare models themselves.
+
+### Disclaimer
+
+These results are **indicative, not definitive**. Local model quality depends heavily on model size, quantization, available VRAM, and prompt sensitivity. Results may vary across runs due to the non-deterministic nature of LLM generation.
+
+The best simulation quality and most educational output was consistently produced by **cloud-hosted frontier models** (Claude Sonnet 4.5, GPT-4o). Local models via Ollama are a valuable **free and private** alternative but should be understood as producing approximations — not authoritative attack analysis.
+
+This tool is designed for **educational exploration**, not as a substitute for professional AI security assessments or red team engagements.
 
 ---
 
