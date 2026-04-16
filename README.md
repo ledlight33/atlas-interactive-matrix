@@ -2,6 +2,7 @@
 
 
 **An interactive visualization of the [MITRE ATLAS™](https://atlas.mitre.org) framework with AI-powered attack simulation.**
+> This project is built upon the outstanding work of the [MITRE Corporation](https://www.mitre.org/) and the ATLAS community. We are grateful to the MITRE team and all contributors who develop and maintain the ATLAS framework — their effort to catalog and share adversarial threat intelligence for AI systems makes projects like this possible.
 
 Explore 16 tactics, 101 techniques, and 66 sub-techniques — then simulate realistic AI attack kill chains using your choice of AI provider.
 
