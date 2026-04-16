@@ -69,6 +69,36 @@ python -m http.server 8080
 ```
 Open `http://localhost:8080` in your browser.
 
+### Requirements
+
+- Any modern browser (Chrome, Firefox, Edge, Safari)
+- Internet connection (for loading React and fonts from CDN)
+- No installation, no build tools, no dependencies
+- AI simulation is optional — requires one of: Ollama (local), Anthropic API key, or OpenAI API key
+
+  ### Fully Offline Use
+
+The matrix loads React and fonts from CDN by default. For 
+air-gapped or fully offline environments:
+
+1. Download these files and place them next to `index.html`:
+   - [react.production.min.js](https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js)
+   - [react-dom.production.min.js](https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js)
+   - [babel.min.js](https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js)
+
+2. Edit `index.html` — replace the three CDN `<script>` URLs 
+   with local paths:
+```html
+   <script src="react.production.min.js"></script>
+   <script src="react-dom.production.min.js"></script>
+   <script src="babel.min.js"></script>
+```
+
+3. Fonts will fall back to system fonts (Segoe UI, Arial) 
+   automatically — no visual breakage, just different typography.
+
+4. Run with a local HTTP server for full functionality.
+
 ---
 
 ## AI Simulation Setup
@@ -135,7 +165,7 @@ Ollama settings include an **Advanced Tuning** section (collapsed by default) wi
 
 **Step 2 — Configure in the matrix:**
 
-Click **⚙** → Select provider → Paste your API key → Click **↻ Load available models** → Choose a model → **Save**.
+Click **⚙** *Setup AI* → Select provider → Paste your API key → Click **↻ Load available models** → Choose a model → **Save**.
 
 #### How your API key is handled
 
