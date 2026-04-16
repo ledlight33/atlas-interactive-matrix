@@ -106,13 +106,12 @@ air-gapped or fully offline environments:
 
 > **Note:** This offline setup has not been extensively tested.
 > If you encounter issues, please open an issue on GitHub.
-```
 
 ---
 
 ## AI Simulation Setup
 
-The matrix works perfectly without AI — simulation is optional. Click the **⚙** button in the header to configure.
+The matrix works perfectly without AI — simulation is optional. Click the **⚙** *Setup AI* button in the header to configure.
 
 ### Local Ollama (Recommended for privacy)
 
@@ -143,7 +142,7 @@ Open `http://localhost:11434` in your browser — you should see "Ollama is runn
 
 **Step 4 — Configure in the matrix:**
 
-Click **⚙** → Select **🦙 Local Ollama** → Click **↻ Test connection** → Choose your model from the dropdown → **Save**.
+Click **⚙** *Setup AI* → Select **🦙 Local Ollama** → Click **↻ Test connection** → Choose your model from the dropdown → **Save**.
 
 #### Some Models we tried on *8gb VRAM*
 
