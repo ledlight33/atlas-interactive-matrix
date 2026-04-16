@@ -214,6 +214,18 @@ We tested the same technique (**T0054 LLM Jailbreak**) across four models to eva
 - **Hard-enforcement logic** ensures the selected technique always appears in the kill chain — even when the model ignores the instruction. When auto-correction is applied, the tool transparently flags it with an "AUTO-CORRECTED" warning.
 - **Dynamic model selection** across all providers means users can test and compare models themselves.
 
+### Another Example - Visual Comparison: Cloud vs Local AI
+
+Here is an example of the same technique (**T0007 - Discover AI Artifacts**) simulated by different providers. Notice the difference in scenario coherence and AI-native specificity.
+
+**1. Claude 4.5 Sonnet (`claude-4-5-sonnet-20250929` via API)**
+Generates a highly coherent, enterprise-focused "Smash and Grab" scenario targeting MLflow and AWS S3.
+![Claude 4.5 Sonnet Simulation](docs/screenshots/example_claude_son45.png)
+
+**2. Dolphin Mixtral 26GB (`dolphin-mixtral:latest` via Local Ollama)**
+Generates a creative, highly specific scenario targeting a RAG system and Hugging Face registries, demonstrating the power of the tool's built-in few-shot prompting for local models.
+![Ollama Mixtral Simulation](docs/screenshots/example_ollama_mixtral.png)
+
 ### Disclaimer
 
 These results are **indicative, not definitive**. Local model quality depends heavily on model size, quantization, available VRAM, and prompt sensitivity. Results may vary across runs due to the non-deterministic nature of LLM generation.
