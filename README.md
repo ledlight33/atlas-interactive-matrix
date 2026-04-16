@@ -1,4 +1,5 @@
-# ATLAS Interactive Matrix
+![ATLAS Interactive Matrix](docs/screenshots/banner.png)
+
 
 **An interactive visualization of the [MITRE ATLAS™](https://atlas.mitre.org) framework with AI-powered attack simulation.**
 
@@ -272,7 +273,7 @@ Areas where contributions would be valuable:
 
 Built by a Digital Forensics Investigator and AI Security researcher exploring the intersection of DFIR methodology and adversarial AI.
 https://marinobekios.com/
-in/marbekios
+linkedin.com/in/marbekios
 
 ## Thank you!
 
