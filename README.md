@@ -280,8 +280,7 @@ Areas where contributions would be valuable:
 ## Roadmap
 
 - [x] v1.0 — Interactive ATLAS matrix with AI attack simulation
-- [ ] v1.1 — OWASP Top 10 for LLMs section with cross-referenced ATLAS techniques
-
+- [ ] v1.1 — Coming Soon
 
 ---
 
