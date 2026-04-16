@@ -8,6 +8,10 @@ Explore 16 tactics, 101 techniques, and 66 sub-techniques — then simulate real
 
 ---
 
+## Preview
+
+![Matrix Overview](docs/screenshots/matrix-overview.png)
+
 ## Features
 
 ### Interactive Matrix
