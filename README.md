@@ -99,6 +99,9 @@ air-gapped or fully offline environments:
 
 4. Run with a local HTTP server for full functionality.
 
+> **Note:** This offline setup has not been extensively tested. 
+> If you encounter issues, please open an issue on GitHub.
+
 ---
 
 ## AI Simulation Setup
