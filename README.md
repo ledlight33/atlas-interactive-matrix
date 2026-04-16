@@ -12,6 +12,10 @@ Explore 16 tactics, 101 techniques, and 66 sub-techniques — then simulate real
 
 ![Matrix Overview](docs/screenshots/matrix-overview.png)
 
+# ATLAS Interactive Matrix
+
+**🔴 [Live Demo](https://ledlight33.github.io/atlas-interactive-matrix/)** · An interactive visualization of the [MITRE ATLAS™](https://atlas.mitre.org) framework with AI-powered attack simulation.
+
 ## Features
 
 ### Interactive Matrix
