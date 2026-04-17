@@ -286,4 +286,10 @@ Areas where contributions would be valuable:
 
 ---
 
+## Author
+
+Built by **[Marino Bekios](https://linkedin.com/in/marbekios)** — Digital Forensics Investigator  
+and AI Security researcher exploring the intersection of DFIR and adversarial AI.  
+🌐 [marinobekios.com](https://marinobekios.com)
+
 If this project is useful, consider giving it a ⭐ — it helps others discover it.
