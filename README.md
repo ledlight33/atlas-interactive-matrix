@@ -16,7 +16,7 @@ Explore 16 tactics, 101 techniques, and 66 sub-techniques — then simulate real
 
 ## How it works
 
-[📊 See the full architecture flow](https://ledlight33.github.io/atlas-interactive-matrix/flow.html)
+[![📊 See the full architecture flow](docs/screenshots/flow.png)](https://ledlight33.github.io/atlas-interactive-matrix/flow.html)
 
 # Live Demo
 
