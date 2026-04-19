@@ -1,4 +1,4 @@
-![ATLAS Interactive Matrix](docs/screenshots/banner.png)
+![ATLAS Interactive Matrix](docs/screenshots/banner.gif)
 
 
 **An interactive visualization of the [MITRE ATLAS™](https://atlas.mitre.org) framework with AI-powered attack simulation.**
