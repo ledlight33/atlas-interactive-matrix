@@ -13,10 +13,49 @@
 <body>
 <div id="root"></div>
 <script type="text/babel" data-type="module">
-const { useState, useMemo, useCallback, useEffect } = React;
+const { useState, useMemo, useCallback, useEffect, useRef } = React;
 
 
 const ATLAS_DATA = {"tactics": [{"id": "AML.TA0002", "name": "Reconnaissance", "desc": "The adversary is trying to gather information about the AI system they can use to plan future operations."}, {"id": "AML.TA0003", "name": "Resource Development", "desc": "The adversary is trying to establish resources they can use to support operations."}, {"id": "AML.TA0004", "name": "Initial Access", "desc": "The adversary is trying to gain access to the AI system."}, {"id": "AML.TA0000", "name": "AI Model Access", "desc": "The adversary is attempting to gain some level of access to an AI model."}, {"id": "AML.TA0005", "name": "Execution", "desc": "The adversary is trying to run malicious code embedded in AI artifacts or software."}, {"id": "AML.TA0006", "name": "Persistence", "desc": "The adversary is trying to maintain their foothold via AI artifacts or software."}, {"id": "AML.TA0012", "name": "Privilege Escalation", "desc": "The adversary is trying to gain higher-level permissions."}, {"id": "AML.TA0007", "name": "Defense Evasion", "desc": "The adversary is trying to avoid being detected by AI-enabled security software."}, {"id": "AML.TA0013", "name": "Credential Access", "desc": "The adversary is trying to steal account names and passwords."}, {"id": "AML.TA0008", "name": "Discovery", "desc": "The adversary is trying to figure out your AI environment."}, {"id": "AML.TA0015", "name": "Lateral Movement", "desc": "The adversary is trying to move through your AI environment."}, {"id": "AML.TA0009", "name": "Collection", "desc": "The adversary is trying to gather AI artifacts and other related information relevant to their goal."}, {"id": "AML.TA0001", "name": "AI Attack Staging", "desc": "The adversary is leveraging their knowledge of and access to the target system to tailor the attack."}, {"id": "AML.TA0014", "name": "Command and Control", "desc": "The adversary is trying to communicate with compromised AI systems to control them."}, {"id": "AML.TA0010", "name": "Exfiltration", "desc": "The adversary is trying to steal AI artifacts or other information about the AI system."}, {"id": "AML.TA0011", "name": "Impact", "desc": "The adversary is trying to manipulate, interrupt, erode confidence in, or destroy your AI systems and data."}], "techniques": [{"id": "AML.T0000", "name": "Search Open Technical Databases", "tactics": ["AML.TA0002"], "desc": "Adversaries may search for publicly available research and technical documentation to learn how and where AI is used within a victim organization.", "subs": [{"id": "AML.T0000.000", "name": "Journals and Conference Proceedings"}, {"id": "AML.T0000.001", "name": "Pre-Print Repositories"}, {"id": "AML.T0000.002", "name": "Technical Blogs"}]}, {"id": "AML.T0001", "name": "Search Open AI Vulnerability Analysis", "tactics": ["AML.TA0002"], "desc": "Adversaries may search for public AI vulnerability disclosures and analysis.", "subs": []}, {"id": "AML.T0003", "name": "Search Victim-Owned Websites", "tactics": ["AML.TA0002"], "desc": "Adversaries may search websites owned by the victim for information that can be used during targeting.", "subs": []}, {"id": "AML.T0004", "name": "Search Application Repositories", "tactics": ["AML.TA0002"], "desc": "Adversaries may search open application repositories during targeting.", "subs": []}, {"id": "AML.T0006", "name": "Active Scanning", "tactics": ["AML.TA0002"], "desc": "An adversary may probe or scan the victim system to gather information for targeting.", "subs": []}, {"id": "AML.T0002", "name": "Acquire Public AI Artifacts", "tactics": ["AML.TA0003"], "desc": "Adversaries may search public sources to identify AI artifacts.", "subs": [{"id": "AML.T0002.000", "name": "Datasets"}, {"id": "AML.T0002.001", "name": "Models"}]}, {"id": "AML.T0016", "name": "Obtain Capabilities", "tactics": ["AML.TA0003"], "desc": "Adversaries may search for and obtain software capabilities for use in their operations.", "subs": [{"id": "AML.T0016.000", "name": "Adversarial AI Attack Implementations"}, {"id": "AML.T0016.001", "name": "Software Tools"}, {"id": "AML.T0016.002", "name": "Generative AI"}]}, {"id": "AML.T0017", "name": "Develop Capabilities", "tactics": ["AML.TA0003"], "desc": "Adversaries may develop their own capabilities to support operations.", "subs": [{"id": "AML.T0017.000", "name": "Adversarial AI Attacks"}]}, {"id": "AML.T0008", "name": "Acquire Infrastructure", "tactics": ["AML.TA0003"], "desc": "Adversaries may buy, lease, or rent infrastructure for use throughout their operation.", "subs": [{"id": "AML.T0008.000", "name": "AI Development Workspaces"}, {"id": "AML.T0008.001", "name": "Consumer Hardware"}, {"id": "AML.T0008.002", "name": "Domains"}, {"id": "AML.T0008.003", "name": "Physical Countermeasures"}, {"id": "AML.T0008.004", "name": "Serverless"}, {"id": "AML.T0008.005", "name": "AI Service Proxies"}]}, {"id": "AML.T0019", "name": "Publish Poisoned Datasets", "tactics": ["AML.TA0003"], "desc": "Adversaries may publish poisoned datasets for victim consumption.", "subs": []}, {"id": "AML.T0010", "name": "AI Supply Chain Compromise", "tactics": ["AML.TA0004"], "desc": "Adversaries may gain initial access by compromising the AI supply chain.", "subs": [{"id": "AML.T0010.000", "name": "Hardware"}, {"id": "AML.T0010.001", "name": "AI Software"}, {"id": "AML.T0010.002", "name": "Data"}, {"id": "AML.T0010.003", "name": "Model"}, {"id": "AML.T0010.004", "name": "Container Registry"}, {"id": "AML.T0010.005", "name": "AI Agent Tool"}]}, {"id": "AML.T0040", "name": "AI Model Inference API Access", "tactics": ["AML.TA0000"], "desc": "Adversaries may gain access to a model via legitimate access to the inference API.", "subs": []}, {"id": "AML.T0047", "name": "AI-Enabled Product or Service", "tactics": ["AML.TA0000"], "desc": "Adversaries may use a product or service that uses AI under the hood to gain access to the underlying model.", "subs": []}, {"id": "AML.T0041", "name": "Physical Environment Access", "tactics": ["AML.TA0000"], "desc": "Adversaries may exploit the physical environment for their attacks.", "subs": []}, {"id": "AML.T0044", "name": "Full AI Model Access", "tactics": ["AML.TA0000"], "desc": "Adversaries may gain full white-box access to an AI model.", "subs": []}, {"id": "AML.T0013", "name": "Discover AI Model Ontology", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover the ontology of an AI model's output space.", "subs": []}, {"id": "AML.T0014", "name": "Discover AI Model Family", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover the general family of model.", "subs": []}, {"id": "AML.T0020", "name": "Poison Training Data", "tactics": ["AML.TA0003", "AML.TA0006"], "desc": "Adversaries may poison datasets used by an AI model by modifying the underlying data or its labels.", "subs": []}, {"id": "AML.T0021", "name": "Establish Accounts", "tactics": ["AML.TA0003"], "desc": "Adversaries may create accounts with various services for use in targeting.", "subs": []}, {"id": "AML.T0005", "name": "Create Proxy AI Model", "tactics": ["AML.TA0001"], "desc": "Adversaries may obtain models to serve as proxies for the target model.", "subs": [{"id": "AML.T0005.000", "name": "Train Proxy via Gathered AI Artifacts"}, {"id": "AML.T0005.001", "name": "Train Proxy via Replication"}, {"id": "AML.T0005.002", "name": "Use Pre-Trained Model"}]}, {"id": "AML.T0007", "name": "Discover AI Artifacts", "tactics": ["AML.TA0008"], "desc": "Adversaries may search private sources to identify AI artifacts.", "subs": []}, {"id": "AML.T0011", "name": "User Execution", "tactics": ["AML.TA0005"], "desc": "An adversary may rely upon specific actions by a user to gain execution.", "subs": [{"id": "AML.T0011.000", "name": "Unsafe AI Artifacts"}, {"id": "AML.T0011.001", "name": "Malicious Package"}, {"id": "AML.T0011.002", "name": "Poisoned AI Agent Tool"}, {"id": "AML.T0011.003", "name": "Malicious Link"}]}, {"id": "AML.T0012", "name": "Valid Accounts", "tactics": ["AML.TA0004", "AML.TA0012"], "desc": "Adversaries may obtain and abuse credentials of existing accounts.", "subs": []}, {"id": "AML.T0015", "name": "Evade AI Model", "tactics": ["AML.TA0004", "AML.TA0007", "AML.TA0011"], "desc": "Adversaries may craft adversarial data to evade AI model detection.", "subs": []}, {"id": "AML.T0018", "name": "Manipulate AI Model", "tactics": ["AML.TA0006", "AML.TA0001"], "desc": "Adversaries may directly manipulate an AI model to change its behavior.", "subs": [{"id": "AML.T0018.000", "name": "Poison AI Model"}, {"id": "AML.T0018.001", "name": "Modify AI Model Architecture"}, {"id": "AML.T0018.002", "name": "Embed Malware"}]}, {"id": "AML.T0024", "name": "Exfiltration via AI Inference API", "tactics": ["AML.TA0010"], "desc": "Adversaries may exfiltrate private information via AI Model Inference API Access.", "subs": [{"id": "AML.T0024.000", "name": "Infer Training Data Membership"}, {"id": "AML.T0024.001", "name": "Invert AI Model"}, {"id": "AML.T0024.002", "name": "Extract AI Model"}]}, {"id": "AML.T0025", "name": "Exfiltration via Cyber Means", "tactics": ["AML.TA0010"], "desc": "Adversaries may exfiltrate AI artifacts via traditional cyber means.", "subs": []}, {"id": "AML.T0029", "name": "Denial of AI Service", "tactics": ["AML.TA0011"], "desc": "Adversaries may flood AI systems to degrade or shut down the service.", "subs": []}, {"id": "AML.T0046", "name": "Spamming AI System with Chaff Data", "tactics": ["AML.TA0011"], "desc": "Adversaries may spam AI systems with chaff data to increase detections.", "subs": []}, {"id": "AML.T0031", "name": "Erode AI Model Integrity", "tactics": ["AML.TA0011"], "desc": "Adversaries may degrade model performance with adversarial inputs over time.", "subs": []}, {"id": "AML.T0034", "name": "Cost Harvesting", "tactics": ["AML.TA0011"], "desc": "Adversaries may drive AI services beyond normal capacity to increase costs.", "subs": [{"id": "AML.T0034.000", "name": "Excessive Queries"}, {"id": "AML.T0034.001", "name": "Resource-Intensive Queries"}, {"id": "AML.T0034.002", "name": "Agentic Resource Consumption"}]}, {"id": "AML.T0035", "name": "AI Artifact Collection", "tactics": ["AML.TA0009"], "desc": "Adversaries may collect AI artifacts for exfiltration.", "subs": []}, {"id": "AML.T0036", "name": "Data from Information Repositories", "tactics": ["AML.TA0009"], "desc": "Adversaries may leverage information repositories to mine valuable information.", "subs": []}, {"id": "AML.T0037", "name": "Data from Local System", "tactics": ["AML.TA0009"], "desc": "Adversaries may search local system sources to find files of interest.", "subs": []}, {"id": "AML.T0042", "name": "Verify Attack", "tactics": ["AML.TA0001"], "desc": "Adversaries can verify the efficacy of their attack via an inference API or offline model copy.", "subs": []}, {"id": "AML.T0043", "name": "Craft Adversarial Data", "tactics": ["AML.TA0001"], "desc": "Adversarial data are inputs modified to cause the adversary's desired effect in the target model.", "subs": [{"id": "AML.T0043.000", "name": "White-Box Optimization"}, {"id": "AML.T0043.001", "name": "Black-Box Optimization"}, {"id": "AML.T0043.002", "name": "Black-Box Transfer"}, {"id": "AML.T0043.003", "name": "Manual Modification"}, {"id": "AML.T0043.004", "name": "Insert Backdoor Trigger"}]}, {"id": "AML.T0048", "name": "External Harms", "tactics": ["AML.TA0011"], "desc": "Adversaries may cause harms external to the victim system.", "subs": [{"id": "AML.T0048.000", "name": "Financial Harm"}, {"id": "AML.T0048.001", "name": "Reputational Harm"}, {"id": "AML.T0048.002", "name": "Societal Harm"}, {"id": "AML.T0048.003", "name": "User Harm"}, {"id": "AML.T0048.004", "name": "AI Intellectual Property Theft"}]}, {"id": "AML.T0049", "name": "Exploit Public-Facing Application", "tactics": ["AML.TA0004"], "desc": "Adversaries may exploit weaknesses in Internet-facing applications.", "subs": []}, {"id": "AML.T0050", "name": "Command and Scripting Interpreter", "tactics": ["AML.TA0005"], "desc": "Adversaries may abuse command and script interpreters to execute commands.", "subs": []}, {"id": "AML.T0051", "name": "LLM Prompt Injection", "tactics": ["AML.TA0005"], "desc": "An adversary may craft malicious prompts that cause the LLM to act in unintended ways.", "subs": [{"id": "AML.T0051.000", "name": "Direct"}, {"id": "AML.T0051.001", "name": "Indirect"}, {"id": "AML.T0051.002", "name": "Triggered"}]}, {"id": "AML.T0052", "name": "Phishing", "tactics": ["AML.TA0004", "AML.TA0015"], "desc": "Adversaries may send phishing messages to gain access to victim systems.", "subs": [{"id": "AML.T0052.000", "name": "Spearphishing via Social Engineering LLM"}]}, {"id": "AML.T0053", "name": "AI Agent Tool Invocation", "tactics": ["AML.TA0005", "AML.TA0012"], "desc": "Adversaries may invoke tools an AI agent has access to.", "subs": []}, {"id": "AML.T0054", "name": "LLM Jailbreak", "tactics": ["AML.TA0012", "AML.TA0007"], "desc": "An adversary may target the inputs or architecture of an LLM to bypass controls.", "subs": []}, {"id": "AML.T0055", "name": "Unsecured Credentials", "tactics": ["AML.TA0013"], "desc": "Adversaries may search compromised systems for insecurely stored credentials.", "subs": []}, {"id": "AML.T0056", "name": "Extract LLM System Prompt", "tactics": ["AML.TA0010"], "desc": "Adversaries may attempt to extract an LLM's system prompt.", "subs": []}, {"id": "AML.T0057", "name": "LLM Data Leakage", "tactics": ["AML.TA0010"], "desc": "Adversaries may craft prompts that induce the LLM to leak sensitive information.", "subs": []}, {"id": "AML.T0058", "name": "Publish Poisoned Models", "tactics": ["AML.TA0003"], "desc": "Adversaries may publish a poisoned model to a public registry.", "subs": []}, {"id": "AML.T0059", "name": "Erode Dataset Integrity", "tactics": ["AML.TA0011"], "desc": "Adversaries may poison portions of a dataset to reduce usefulness.", "subs": []}, {"id": "AML.T0060", "name": "Publish Hallucinated Entities", "tactics": ["AML.TA0003"], "desc": "Adversaries may create entities hallucinated by an LLM.", "subs": []}, {"id": "AML.T0061", "name": "LLM Prompt Self-Replication", "tactics": ["AML.TA0006"], "desc": "An adversary may craft self-replicating prompt injections.", "subs": []}, {"id": "AML.T0062", "name": "Discover LLM Hallucinations", "tactics": ["AML.TA0008"], "desc": "Adversaries may prompt LLMs to identify hallucinated entities.", "subs": []}, {"id": "AML.T0063", "name": "Discover AI Model Outputs", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover unintended model outputs.", "subs": []}, {"id": "AML.T0064", "name": "Gather RAG-Indexed Targets", "tactics": ["AML.TA0002"], "desc": "Adversaries may identify data sources used in RAG systems.", "subs": []}, {"id": "AML.T0065", "name": "LLM Prompt Crafting", "tactics": ["AML.TA0003"], "desc": "Adversaries may craft prompts that bypass AI system defenses.", "subs": []}, {"id": "AML.T0066", "name": "Retrieval Content Crafting", "tactics": ["AML.TA0003"], "desc": "Adversaries may write content designed to be retrieved and influence users.", "subs": []}, {"id": "AML.T0067", "name": "LLM Trusted Output Components Manipulation", "tactics": ["AML.TA0007"], "desc": "Adversaries may manipulate LLM response components to appear trustworthy.", "subs": [{"id": "AML.T0067.000", "name": "Citations"}]}, {"id": "AML.T0068", "name": "LLM Prompt Obfuscation", "tactics": ["AML.TA0007"], "desc": "Adversaries may obfuscate prompt injections to avoid detection.", "subs": []}, {"id": "AML.T0069", "name": "Discover LLM System Information", "tactics": ["AML.TA0008"], "desc": "Adversaries may try to discover LLM system information.", "subs": [{"id": "AML.T0069.000", "name": "Special Character Sets"}, {"id": "AML.T0069.001", "name": "System Instruction Keywords"}, {"id": "AML.T0069.002", "name": "System Prompt"}]}, {"id": "AML.T0070", "name": "RAG Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may inject malicious content into RAG-indexed data.", "subs": []}, {"id": "AML.T0071", "name": "False RAG Entry Injection", "tactics": ["AML.TA0007"], "desc": "Adversaries may introduce false entries into RAG databases.", "subs": []}, {"id": "AML.T0072", "name": "Reverse Shell", "tactics": ["AML.TA0014"], "desc": "Adversaries may utilize a reverse shell to control the victim system.", "subs": []}, {"id": "AML.T0073", "name": "Impersonation", "tactics": ["AML.TA0007"], "desc": "Adversaries may impersonate trusted entities.", "subs": []}, {"id": "AML.T0074", "name": "Masquerading", "tactics": ["AML.TA0007"], "desc": "Adversaries may manipulate artifact features to appear legitimate.", "subs": []}, {"id": "AML.T0075", "name": "Cloud Service Discovery", "tactics": ["AML.TA0008"], "desc": "Adversaries may enumerate cloud services on a system.", "subs": []}, {"id": "AML.T0076", "name": "Corrupt AI Model", "tactics": ["AML.TA0007"], "desc": "An adversary may corrupt a model file to evade detection by scanners.", "subs": []}, {"id": "AML.T0077", "name": "LLM Response Rendering", "tactics": ["AML.TA0010"], "desc": "An adversary may get an LLM to include hidden data in rendered responses.", "subs": []}, {"id": "AML.T0078", "name": "Drive-by Compromise", "tactics": ["AML.TA0004"], "desc": "Adversaries may gain access through normal browsing activity.", "subs": []}, {"id": "AML.T0079", "name": "Stage Capabilities", "tactics": ["AML.TA0003"], "desc": "Adversaries may upload or install capabilities for targeting.", "subs": []}, {"id": "AML.T0080", "name": "AI Agent Context Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may manipulate an AI agent's context to influence its behavior.", "subs": [{"id": "AML.T0080.000", "name": "Memory"}, {"id": "AML.T0080.001", "name": "Thread"}]}, {"id": "AML.T0081", "name": "Modify AI Agent Configuration", "tactics": ["AML.TA0006", "AML.TA0007"], "desc": "Adversaries may modify AI agent configuration files.", "subs": []}, {"id": "AML.T0082", "name": "RAG Credential Harvesting", "tactics": ["AML.TA0013"], "desc": "Adversaries may use LLM access to collect credentials from RAG data.", "subs": []}, {"id": "AML.T0083", "name": "Credentials from AI Agent Configuration", "tactics": ["AML.TA0013"], "desc": "Adversaries may access credentials from AI agent configuration.", "subs": []}, {"id": "AML.T0084", "name": "Discover AI Agent Configuration", "tactics": ["AML.TA0008"], "desc": "Adversaries may discover AI agent configuration information.", "subs": [{"id": "AML.T0084.000", "name": "Embedded Knowledge"}, {"id": "AML.T0084.001", "name": "Tool Definitions"}, {"id": "AML.T0084.002", "name": "Activation Triggers"}, {"id": "AML.T0084.003", "name": "Call Chains"}]}, {"id": "AML.T0085", "name": "Data from AI Services", "tactics": ["AML.TA0009"], "desc": "Adversaries may collect sensitive information from AI-enabled services.", "subs": [{"id": "AML.T0085.000", "name": "RAG Databases"}, {"id": "AML.T0085.001", "name": "AI Agent Tools"}]}, {"id": "AML.T0086", "name": "Exfiltration via AI Agent Tool Invocation", "tactics": ["AML.TA0010"], "desc": "Agent tools may be invoked to exfiltrate data.", "subs": []}, {"id": "AML.T0087", "name": "Gather Victim Identity Information", "tactics": ["AML.TA0002"], "desc": "Adversaries may gather victim identity information for targeting.", "subs": []}, {"id": "AML.T0088", "name": "Generate Deepfakes", "tactics": ["AML.TA0001"], "desc": "Adversaries may use GenAI to create synthetic media.", "subs": []}, {"id": "AML.T0089", "name": "Process Discovery", "tactics": ["AML.TA0008"], "desc": "Adversaries may get information about running processes.", "subs": []}, {"id": "AML.T0090", "name": "OS Credential Dumping", "tactics": ["AML.TA0013"], "desc": "Adversaries may extract credentials from OS caches or memory.", "subs": []}, {"id": "AML.T0091", "name": "Use Alternate Authentication Material", "tactics": ["AML.TA0015"], "desc": "Adversaries may use alternate auth material to move laterally.", "subs": [{"id": "AML.T0091.000", "name": "Application Access Token"}]}, {"id": "AML.T0092", "name": "Manipulate User LLM Chat History", "tactics": ["AML.TA0007"], "desc": "Adversaries may manipulate LLM chat history to cover tracks.", "subs": []}, {"id": "AML.T0093", "name": "Prompt Infiltration via Public-Facing Application", "tactics": ["AML.TA0004", "AML.TA0006"], "desc": "Adversaries may introduce malicious prompts via public-facing applications.", "subs": []}, {"id": "AML.T0094", "name": "Delay Execution of LLM Instructions", "tactics": ["AML.TA0007"], "desc": "Adversaries may include time-delayed instructions to evade detection.", "subs": []}, {"id": "AML.T0095", "name": "Search Open Websites/Domains", "tactics": ["AML.TA0002"], "desc": "Adversaries may search public websites for victim information.", "subs": []}, {"id": "AML.T0096", "name": "AI Service API", "tactics": ["AML.TA0014"], "desc": "Adversaries may communicate using the API of an AI service.", "subs": []}, {"id": "AML.T0097", "name": "Virtualization/Sandbox Evasion", "tactics": ["AML.TA0007"], "desc": "Adversaries may detect and avoid virtualization environments.", "subs": []}, {"id": "AML.T0098", "name": "AI Agent Tool Credential Harvesting", "tactics": ["AML.TA0013"], "desc": "Adversaries may use AI agent access to harvest credentials from tools.", "subs": []}, {"id": "AML.T0099", "name": "AI Agent Tool Data Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may place malicious content retrievable by AI Agent Tools.", "subs": []}, {"id": "AML.T0100", "name": "AI Agent Clickbait", "tactics": ["AML.TA0005"], "desc": "Adversaries may craft deceptive content to bait AI agents.", "subs": []}, {"id": "AML.T0101", "name": "Data Destruction via AI Agent Tool Invocation", "tactics": ["AML.TA0011"], "desc": "Adversaries may invoke agent tools to perform data destruction.", "subs": []}, {"id": "AML.T0102", "name": "Generate Malicious Commands", "tactics": ["AML.TA0001"], "desc": "Adversaries may use LLMs to generate malicious commands from natural language.", "subs": []}, {"id": "AML.T0103", "name": "Deploy AI Agent", "tactics": ["AML.TA0005"], "desc": "Adversaries may launch AI agents in the victim's environment.", "subs": []}, {"id": "AML.T0104", "name": "Publish Poisoned AI Agent Tool", "tactics": ["AML.TA0003"], "desc": "Adversaries may create and publish poisoned AI agent tools.", "subs": []}, {"id": "AML.T0105", "name": "Escape to Host", "tactics": ["AML.TA0012"], "desc": "Adversaries may break out of containers to access the underlying host.", "subs": []}, {"id": "AML.T0106", "name": "Exploitation for Credential Access", "tactics": ["AML.TA0013"], "desc": "Adversaries may exploit vulnerabilities to collect credentials.", "subs": []}, {"id": "AML.T0107", "name": "Exploitation for Defense Evasion", "tactics": ["AML.TA0007"], "desc": "Adversaries may exploit vulnerabilities to bypass security features.", "subs": []}, {"id": "AML.T0108", "name": "AI Agent", "tactics": ["AML.TA0014"], "desc": "Adversaries may abuse AI agents for command and control.", "subs": []}, {"id": "AML.T0109", "name": "AI Supply Chain Rug Pull", "tactics": ["AML.TA0007"], "desc": "Adversaries may publish legitimate AI components then push malicious updates.", "subs": []}, {"id": "AML.T0110", "name": "AI Agent Tool Poisoning", "tactics": ["AML.TA0006"], "desc": "Adversaries may poison tools used by AI agents including MCP connections.", "subs": []}, {"id": "AML.T0111", "name": "AI Supply Chain Reputation Inflation", "tactics": ["AML.TA0007"], "desc": "Building credible trust signals to increase perceived legitimacy of AI supply chain components.", "subs": []}, {"id": "AML.T0112", "name": "Machine Compromise", "tactics": ["AML.TA0011"], "desc": "Adversaries may compromise a machine via AI-enabled components.", "subs": [{"id": "AML.T0112.000", "name": "Local AI Agent"}, {"id": "AML.T0112.001", "name": "AI Artifacts"}]}]};
+
+// === OFFICIAL ATLAS MITIGATIONS (v5.5.0, all 35) ===
+const MITIGATIONS_DATA = [
+  {id:"AML.M0000",name:"Limit Public Release of Information",desc:"Limit the public release of technical information about the AI stack used in an organization's products or services.",techniques:["AML.T0000","AML.T0003","AML.T0002","AML.T0004","AML.T0005","AML.T0005.000","AML.T0005.002"]},
+  {id:"AML.M0001",name:"Limit Model Artifact Release",desc:"Limit public release of technical project details including data, algorithms, model architectures, and model checkpoints that are used in production.",techniques:["AML.T0002.000","AML.T0002.001","AML.T0020","AML.T0005","AML.T0035","AML.T0005.000"]},
+  {id:"AML.M0002",name:"Passive AI Output Obfuscation",desc:"Decreasing the fidelity of model outputs provided to the end user can reduce an adversary's ability to extract information about the model.",techniques:["AML.T0013","AML.T0014","AML.T0043.001","AML.T0024.000","AML.T0024.001","AML.T0024.002","AML.T0043","AML.T0005","AML.T0042","AML.T0005.001","AML.T0063"]},
+  {id:"AML.M0003",name:"Model Hardening",desc:"Use techniques to make AI models robust to adversarial inputs such as adversarial training or network distillation.",techniques:["AML.T0015","AML.T0031","AML.T0043","AML.T0043.001","AML.T0043.002","AML.T0043.003","AML.T0043.000","AML.T0043.004"]},
+  {id:"AML.M0004",name:"Restrict Number of AI Model Queries",desc:"Limit the total number and rate of queries a user can perform.",techniques:["AML.T0034","AML.T0013","AML.T0014","AML.T0024","AML.T0024.000","AML.T0024.001","AML.T0024.002","AML.T0043.001","AML.T0029","AML.T0046","AML.T0043","AML.T0043.003","AML.T0005","AML.T0005.001","AML.T0042","AML.T0062"]},
+  {id:"AML.M0005",name:"Control Access to AI Models and Data at Rest",desc:"Establish access controls on internal model registries and limit internal access to production models and training data.",techniques:["AML.T0010.002","AML.T0020","AML.T0018.000","AML.T0018.001","AML.T0010.003","AML.T0025","AML.T0048.004","AML.T0018","AML.T0043.000","AML.T0007","AML.T0044","AML.T0035","AML.T0042"]},
+  {id:"AML.M0006",name:"Use Ensemble Methods",desc:"Use an ensemble of models for inference to increase robustness to adversarial inputs.",techniques:["AML.T0031","AML.T0010.001","AML.T0010.003","AML.T0015","AML.T0014","AML.T0043.000","AML.T0043.001","AML.T0043.002","AML.T0043.004","AML.T0043.003","AML.T0043"]},
+  {id:"AML.M0007",name:"Sanitize Training Data",desc:"Detect and remove or remediate poisoned training data prior to model training and recurrently for active learning models.",techniques:["AML.T0010.002","AML.T0020","AML.T0018.000","AML.T0059"]},
+  {id:"AML.M0008",name:"Validate AI Model",desc:"Validate that AI models perform as intended by testing for backdoor triggers, data leakage, or adversarial influence.",techniques:["AML.T0010.003","AML.T0018.000","AML.T0018.001","AML.T0018","AML.T0043.004","AML.T0020","AML.T0057","AML.T0043"]},
+  {id:"AML.M0009",name:"Use Multi-Modal Sensors",desc:"Incorporate multiple sensors to integrate varying perspectives and modalities to avoid a single point of failure.",techniques:["AML.T0041","AML.T0015","AML.T0088"]},
+  {id:"AML.M0010",name:"Input Restoration",desc:"Preprocess all inference data to nullify or reverse potential adversarial perturbations.",techniques:["AML.T0043.001","AML.T0015","AML.T0031","AML.T0043","AML.T0043.002","AML.T0043.004","AML.T0043.000","AML.T0043.003"]},
+  {id:"AML.M0011",name:"Restrict Library Loading",desc:"Prevent abuse of library loading mechanisms in the operating system and software to load untrusted code.",techniques:["AML.T0011.000","AML.T0011.001","AML.T0011"]},
+  {id:"AML.M0012",name:"Encrypt Sensitive Information",desc:"Encrypt sensitive data such as AI models to protect against adversaries attempting to access sensitive data.",techniques:["AML.T0035","AML.T0048.004","AML.T0007","AML.T0063"]},
+  {id:"AML.M0013",name:"Code Signing",desc:"Enforce binary and application integrity with digital signature verification to prevent untrusted code from executing.",techniques:["AML.T0011.000","AML.T0010.001","AML.T0010.003","AML.T0018","AML.T0018.000","AML.T0018.001","AML.T0018.002","AML.T0011.001"]},
+  {id:"AML.M0014",name:"Verify AI Artifacts",desc:"Verify the cryptographic checksum of all AI artifacts to verify that the file was not modified by an attacker.",techniques:["AML.T0019","AML.T0011.000","AML.T0010","AML.T0010.002","AML.T0002.001","AML.T0011"]},
+  {id:"AML.M0015",name:"Adversarial Input Detection",desc:"Detect and block adversarial inputs or atypical queries that deviate from known benign behavior.",techniques:["AML.T0015","AML.T0043.001","AML.T0029","AML.T0031","AML.T0043","AML.T0043.000","AML.T0043.002","AML.T0043.004","AML.T0043.003"]},
+  {id:"AML.M0016",name:"Vulnerability Scanning",desc:"Vulnerability scanning is used to find potentially exploitable software vulnerabilities to remediate them.",techniques:["AML.T0011.000","AML.T0011.001","AML.T0011"]},
+  {id:"AML.M0017",name:"AI Model Distribution Methods",desc:"Deploying AI models to edge devices can increase the attack surface; consider serving models in the cloud instead.",techniques:["AML.T0044","AML.T0043.000","AML.T0010.003","AML.T0048.004","AML.T0035","AML.T0063"]},
+  {id:"AML.M0018",name:"User Training",desc:"Educate AI model developers on AI supply chain risks and potentially malicious AI artifacts and deepfakes.",techniques:["AML.T0011","AML.T0011.000","AML.T0052","AML.T0052.000","AML.T0011.001"]},
+  {id:"AML.M0019",name:"Control Access to AI Models and Data in Production",desc:"Require users to verify their identities before accessing a production model with authentication for API endpoints.",techniques:["AML.T0040","AML.T0024","AML.T0034","AML.T0043","AML.T0043.001","AML.T0005","AML.T0029","AML.T0051","AML.T0046","AML.T0042","AML.T0063"]},
+  {id:"AML.M0020",name:"Generative AI Guardrails",desc:"Safety controls placed between a generative AI model and output to prevent undesired inputs and outputs.",techniques:["AML.T0054","AML.T0056","AML.T0053","AML.T0051","AML.T0057","AML.T0010","AML.T0061","AML.T0062"]},
+  {id:"AML.M0021",name:"Generative AI Guidelines",desc:"Safety controls placed between user-provided input and a generative AI model to direct desired outputs.",techniques:["AML.T0054","AML.T0056","AML.T0053","AML.T0051","AML.T0057","AML.T0061","AML.T0062"]},
+  {id:"AML.M0022",name:"Generative AI Model Alignment",desc:"Utilize techniques that improve model alignment with safety, security, and content policies during training.",techniques:["AML.T0054","AML.T0056","AML.T0053","AML.T0051","AML.T0057","AML.T0061","AML.T0062"]},
+  {id:"AML.M0023",name:"AI Bill of Materials",desc:"An AI BOM contains a full listing of artifacts and resources used in building the AI to mitigate supply chain risks.",techniques:["AML.T0011.000","AML.T0019","AML.T0020","AML.T0058","AML.T0011.001","AML.T0011","AML.T0010"]},
+  {id:"AML.M0024",name:"AI Telemetry Logging",desc:"Implement logging of inputs and outputs of deployed AI models and agentic intermediate steps and decisions.",techniques:["AML.T0024","AML.T0024.000","AML.T0024.001","AML.T0024.002","AML.T0005.001","AML.T0040","AML.T0047","AML.T0051","AML.T0051.000","AML.T0051.001","AML.T0051.002","AML.T0053","AML.T0086","AML.T0101","AML.T0085","AML.T0085.000","AML.T0085.001"]},
+  {id:"AML.M0025",name:"Maintain AI Dataset Provenance",desc:"Maintain a detailed history of datasets used for AI applications including source and complete record of modifications.",techniques:["AML.T0010.002","AML.T0020","AML.T0018.000","AML.T0019","AML.T0059"]},
+  {id:"AML.M0026",name:"Privileged AI Agent Permissions Configuration",desc:"Implement robust policies and controls on permissions of privileged agents using RBAC, ABAC, and least privilege.",techniques:["AML.T0086","AML.T0053","AML.T0085","AML.T0085.000","AML.T0085.001","AML.T0082","AML.T0101"]},
+  {id:"AML.M0027",name:"Single-User AI Agent Permissions Configuration",desc:"Implement robust policies on permissions and lifecycle management for agents acting as representatives of users.",techniques:["AML.T0086","AML.T0053","AML.T0085","AML.T0085.000","AML.T0085.001","AML.T0082","AML.T0101"]},
+  {id:"AML.M0028",name:"AI Agent Tools Permissions Configuration",desc:"Implement robust policies and controls on permissions for shared tools across multiple AI agents.",techniques:["AML.T0053","AML.T0085","AML.T0085.001","AML.T0101","AML.T0086"]},
+  {id:"AML.M0029",name:"Human In-the-Loop for AI Agent Actions",desc:"Require the user or another human stakeholder to approve AI agent actions before the agent takes them.",techniques:["AML.T0086","AML.T0053","AML.T0101"]},
+  {id:"AML.M0030",name:"Restrict AI Agent Tool Invocation on Untrusted Data",desc:"Restrict or limit tool invocation when untrusted data enters the LLM's context to prevent prompt injections.",techniques:["AML.T0053","AML.T0086","AML.T0101"]},
+  {id:"AML.M0031",name:"Memory Hardening",desc:"Develop trust boundaries and secure processes for how an AI agent stores and accesses memory and context.",techniques:["AML.T0080","AML.T0080.000"]},
+  {id:"AML.M0032",name:"Segmentation of AI Agent Components",desc:"Define security boundaries around agentic tools and data sources with API access, container isolation, and rate limiting.",techniques:["AML.T0053","AML.T0086","AML.T0098","AML.T0085","AML.T0085.000","AML.T0085.001"]},
+  {id:"AML.M0033",name:"Input and Output Validation for AI Agent Components",desc:"Implement validation on inputs and outputs for tools and data sources to prevent compromises from spreading.",techniques:["AML.T0053","AML.T0086","AML.T0051","AML.T0051.000","AML.T0051.001","AML.T0051.002"]},
+  {id:"AML.M0034",name:"Deepfake Detection",desc:"Apply deepfake detection algorithms against untrusted or user-provided data to block generated content.",techniques:["AML.T0088","AML.T0052","AML.T0052.000","AML.T0015"]},
+];
 
 const TC = {
   "AML.TA0002": { bg: "#0d1f33", border: "#3b82f6", glow: "#3b82f622" },
@@ -48,12 +87,13 @@ const PHASES = [
 ];
 
 // === AI SIMULATION ENGINE (multi-provider) ===
-function buildPrompt(tech, allTechs, tactics, useFewShot = false) {
+function buildPrompt(tech, allTechs, tactics, useFewShot = false, mitigations = [], selectedTacticId = null) {
   const techList = allTechs.map(t => `${t.id}: ${t.name} [tactics: ${t.tactics.join(", ")}]`).join("\n");
   const tacticList = tactics.map(t => `${t.id}: ${t.name}`).join("\n");
+  const selectedTacticName = selectedTacticId ? (tactics.find(t => t.id === selectedTacticId)?.name || "") : "";
 
   // Base prompt used for both modes
-  const basePrompt = `You are an AI Security instructor using the MITRE ATLAS framework. The user selected technique: "${tech.id}: ${tech.name}" (${tech.desc}).
+  const basePrompt = `You are an AI Security instructor using the MITRE ATLAS framework. The user selected technique: "${tech.id}: ${tech.name}" (${tech.desc}).${selectedTacticId ? `\nThe user selected this technique in the context of tactic: ${selectedTacticId} — ${selectedTacticName}. You MUST place this technique under tactic ${selectedTacticId} (${selectedTacticName}) in the attack_path.` : ""}
 
 Available ATLAS tactics (in kill-chain order):
 ${tacticList}
@@ -77,7 +117,11 @@ Rules:
 - attack_path must have 3-6 steps following the kill-chain order
 - The selected technique MUST be included in the path
 - Use ONLY real ATLAS technique IDs from the list above
-- example should be practical and educational, not just theory`;
+- example should be practical and educational, not just theory${mitigations.length > 0 ? `
+- In the "defense" field, reference 1-2 specific official ATLAS mitigation IDs from the list below with their names (e.g. "AML.M0020 Generative AI Guardrails")
+
+Official ATLAS mitigations applicable to this technique:
+${mitigations.map(m => `  ${m.id} — ${m.name}: ${m.desc}`).join("\n")}` : ""}`;
 
   if (!useFewShot) return basePrompt;
 
@@ -119,14 +163,21 @@ function extractJSON(text) {
   // If there's text before/after the JSON, try to extract it
   const match = clean.match(/\{[\s\S]*\}/);
   if (match) clean = match[0];
-  return JSON.parse(clean);
+  try {
+    return JSON.parse(clean);
+  } catch (e) {
+    if (e.message.includes("Unexpected end") || e.message.includes("Unterminated")) {
+      throw new Error("The model's response was cut off before finishing. Open ⚙ Settings → Advanced Tuning → increase Num Predict to 4000 or higher, then try again.");
+    }
+    throw new Error(`Failed to parse model response as JSON: ${e.message}. The model may not have followed the JSON format — try a different model or retry.`);
+  }
 }
 
-async function runSimulation(tech, allTechs, tactics, config) {
+async function runSimulation(tech, allTechs, tactics, config, mitigations = [], selectedTacticId = null) {
   const { provider, apiKey, ollamaUrl, ollamaModel, cloudModel } = config;
   // Use few-shot enriched prompt only for Ollama (smaller local models benefit hugely)
   // Claude and GPT already know ATLAS well enough without examples
-  const prompt = buildPrompt(tech, allTechs, tactics, provider === "ollama");
+  const prompt = buildPrompt(tech, allTechs, tactics, provider === "ollama", mitigations, selectedTacticId);
 
   if (provider === "anthropic") {
     if (!apiKey) throw new Error("Anthropic API key required. Open settings (⚙) to add it.");
@@ -737,9 +788,9 @@ function TechCard({ tech, color, isSelected, onClick, idx, isHighlighted }) {
         background: isSelected ? color.border + "18" : glowing ? color.border + "20" : isActive ? color.border + "15" : color.bg,
         border: `${isActive ? 2 : 1.5}px solid ${isSelected || isActive || glowing ? color.border : color.border + "40"}`,
         borderRadius: 6,
-        padding: isActive ? "9px 11px" : "5px 7px",
+        padding: isActive ? "10px 12px" : "7px 9px",
         cursor: "pointer",
-        minHeight: isActive ? 68 : 48,
+        minHeight: isActive ? 76 : 56,
         display: "flex", flexDirection: "column", justifyContent: "space-between",
         animation: glowing ? "pathPulse 1.5s ease infinite" : `fadeIn 0.25s ease ${idx * 0.015}s both`,
         boxShadow: isSelected
@@ -757,12 +808,12 @@ function TechCard({ tech, color, isSelected, onClick, idx, isHighlighted }) {
         transition: "transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), min-height 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.22s ease, border-color 0.15s ease, border-width 0.15s ease, box-shadow 0.2s ease, background 0.15s ease",
       }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 3 }}>
-        <span style={{ fontSize: isActive ? 11 : 8.5, color: color.border, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: 0.3, transition: "font-size 0.2s ease" }}>T{num}</span>
+        <span style={{ fontSize: isActive ? 12 : 10, color: color.border, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: 0.3, transition: "font-size 0.2s ease" }}>T{num}</span>
         {hasSubs && <span style={{ fontSize: isActive ? 8.5 : 7, background: color.border + "28", color: color.border, padding: isActive ? "2px 6px" : "1px 4px", borderRadius: 3, fontWeight: 700, lineHeight: isActive ? "16px" : "14px", transition: "all 0.2s ease" }}>{tech.subs.length}</span>}
         {glowing && <span style={{ fontSize: 7, background: "#ff475744", color: "#ff6b7a", padding: "1px 4px", borderRadius: 3, fontWeight: 700, lineHeight: "14px" }}>PATH</span>}
       </div>
       <div style={{
-        fontSize: isActive ? hoverNameSize : 9.5,
+        fontSize: isActive ? hoverNameSize : 11,
         color: isActive ? "#fff" : glowing ? "#fff" : "#dde4ed",
         fontWeight: isActive || glowing ? 600 : 500,
         lineHeight: 1.22,
@@ -826,7 +877,10 @@ function SimPanel({ sim, onClose, color }) {
                 {isInjected && (
                   <span style={{ position: "absolute", top: -8, right: 6, fontSize: 8.5, background: "#f59e0b", color: "#000", padding: "1px 6px", borderRadius: 3, fontWeight: 800, letterSpacing: 0.5 }}>INSERTED</span>
                 )}
-                <div style={{ fontSize: 9.5, color: stepColor, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 }}>{tacticName}</div>
+                <div style={{ fontSize: 9.5, color: stepColor, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 }}>
+                  {tacticName}
+                  {step._tacticCorrected && <span title="This technique belongs to multiple tactics in ATLAS. Tactic label updated to match your selected context." style={{ marginLeft: 5, fontSize: 8, background: "#f59e0b22", color: "#f59e0b", padding: "1px 5px", borderRadius: 3, fontWeight: 700, cursor: "help", textTransform: "none", letterSpacing: 0 }}>multi-tactic</span>}
+                </div>
                 <div style={{ fontSize: 12, color: "#e2e8f0", fontWeight: 600, lineHeight: 1.25, marginBottom: 5 }}>{step.technique_name}</div>
                 <div style={{ fontSize: 11.5, color: "#94a3b8", lineHeight: 1.4 }}>{step.step_description}</div>
                 <div style={{ fontSize: 9.5, color: stepColor + "99", fontFamily: "'JetBrains Mono', monospace", marginTop: 5, fontWeight: 600 }}>{step.technique_id}</div>
@@ -854,7 +908,7 @@ function SimPanel({ sim, onClose, color }) {
   );
 }
 
-function DetailPanel({ tech, tacticName, color, onClose, highlightedTechs, setHighlightedTechs, config, onOpenSettings }) {
+function DetailPanel({ tech, tacticName, tacticId, color, onClose, highlightedTechs, setHighlightedTechs, config, onOpenSettings, techMitigations }) {
   const [sim, setSim] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -864,7 +918,7 @@ function DetailPanel({ tech, tacticName, color, onClose, highlightedTechs, setHi
   const handleSimulate = useCallback(async () => {
     setLoading(true); setError(null); setSim(null); setHighlightedTechs([]);
     try {
-      let result = await runSimulation(tech, ATLAS_DATA.techniques, ATLAS_DATA.tactics, config);
+      let result = await runSimulation(tech, ATLAS_DATA.techniques, ATLAS_DATA.tactics, config, techMitigations || [], tacticId);
       let pathIds = (result.attack_path || []).map(s => s.technique_id);
 
       // Hard-enforcement: the selected technique MUST be in the path.
@@ -876,7 +930,7 @@ function DetailPanel({ tech, tacticName, color, onClose, highlightedTechs, setHi
         try {
           // Retry with stricter config (lower temp for more compliant output)
           const retryConfig = { ...config, temperature: 0.3 };
-          result = await runSimulation(tech, ATLAS_DATA.techniques, ATLAS_DATA.tactics, retryConfig);
+          result = await runSimulation(tech, ATLAS_DATA.techniques, ATLAS_DATA.tactics, retryConfig, techMitigations || [], tacticId);
           pathIds = (result.attack_path || []).map(s => s.technique_id);
         } catch (e) {
           console.warn("[ATLAS] Retry failed, keeping original result.", e);
@@ -912,6 +966,36 @@ function DetailPanel({ tech, tacticName, color, onClose, highlightedTechs, setHi
         } else {
           result = { ...result, _retrySucceeded: true };
         }
+      }
+
+      // Post-processing: fix tactic placement and remove duplicates
+      if (result.attack_path) {
+        let path = [...result.attack_path];
+
+        // Step 1 — de-duplicate: if the selected technique appears more than once,
+        // keep only the best match (correct tactic first, else first occurrence)
+        const techStepIndices = path.reduce((acc, step, i) => {
+          if (step.technique_id === tech.id || step.technique_id?.startsWith(tech.id + ".")) acc.push(i);
+          return acc;
+        }, []);
+        if (techStepIndices.length > 1) {
+          const keepIdx = techStepIndices.find(i => path[i].tactic_id === tacticId) ?? techStepIndices[0];
+          path = path.filter((_, i) => !techStepIndices.includes(i) || i === keepIdx);
+        }
+
+        // Step 2 — tactic correction: if the kept step is under the wrong tactic, relabel it
+        let tacticCorrected = false;
+        if (tacticId) {
+          path = path.map(step => {
+            if ((step.technique_id === tech.id || step.technique_id?.startsWith(tech.id + ".")) && step.tactic_id !== tacticId) {
+              tacticCorrected = true;
+              return { ...step, tactic_id: tacticId, _tacticCorrected: true };
+            }
+            return step;
+          });
+        }
+
+        result = { ...result, attack_path: path, ...(tacticCorrected && { _tacticCorrected: true }) };
       }
 
       setSim(result);
@@ -1002,6 +1086,28 @@ function DetailPanel({ tech, tacticName, color, onClose, highlightedTechs, setHi
           </div>
         )}
 
+        {/* Official Mitigations */}
+        {techMitigations && techMitigations.length > 0 && (
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
+              🛡 Official ATLAS Mitigations ({techMitigations.length})
+            </div>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {techMitigations.map(m => (
+                <a key={m.id} href={`https://atlas.mitre.org/mitigations/${m.id}`} target="_blank" rel="noopener noreferrer"
+                  title={m.desc}
+                  style={{ background: "#22c55e0a", border: "1px solid #22c55e33", borderRadius: 5, padding: "4px 9px", fontSize: 10.5, color: "#86efac", fontWeight: 500, textDecoration: "none", transition: "border-color 0.15s", display: "flex", alignItems: "center", gap: 5 }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "#22c55e"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "#22c55e33"}
+                >
+                  <span style={{ color: "#22c55e", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 700 }}>{m.id}</span>
+                  {m.name}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         <a href={`https://atlas.mitre.org/techniques/${tech.id}`} target="_blank" rel="noopener noreferrer"
           style={{ fontSize: 11, color: color.border, textDecoration: "none", fontWeight: 600 }}>View on ATLAS ↗</a>
 
@@ -1010,6 +1116,231 @@ function DetailPanel({ tech, tacticName, color, onClose, highlightedTechs, setHi
         {sim && <SimPanel sim={sim} color={color} onClose={() => { setSim(null); setHighlightedTechs([]); }} />}
       </div>
     </div>
+  );
+}
+
+// === CIRCUIT BACKGROUND ===
+function CircuitBackground() {
+  const canvasRef = useRef(null);
+  const animRef   = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    // ── resize ──────────────────────────────────────────────────────────────
+    const resize = () => {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // ── palette ─────────────────────────────────────────────────────────────
+    const COLORS = [
+      { line: "rgba(59,130,246,0.18)",  orb: "#3b82f6",  glow: "rgba(59,130,246,0.55)"  },
+      { line: "rgba(139,92,246,0.15)",  orb: "#8b5cf6",  glow: "rgba(139,92,246,0.50)"  },
+      { line: "rgba(6,182,212,0.14)",   orb: "#06b6d4",  glow: "rgba(6,182,212,0.50)"   },
+      { line: "rgba(236,72,153,0.12)",  orb: "#ec4899",  glow: "rgba(236,72,153,0.45)"  },
+    ];
+
+    // ── grid helper ──────────────────────────────────────────────────────────
+    const STEP = 64;  // grid cell size
+
+    function buildGrid() {
+      const cols = Math.ceil(canvas.width  / STEP) + 1;
+      const rows = Math.ceil(canvas.height / STEP) + 1;
+
+      // For each column pick a random subset of rows where a horizontal segment exists,
+      // and for each row a random subset of columns where a vertical segment exists.
+      const hSegs = []; // { x1, y1, x2, y2 }
+      const vSegs = [];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols - 1; c++) {
+          if (Math.random() < 0.32) {
+            hSegs.push({ x1: c * STEP, y: r * STEP, x2: (c + 1) * STEP });
+          }
+        }
+      }
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows - 1; r++) {
+          if (Math.random() < 0.32) {
+            vSegs.push({ x: c * STEP, y1: r * STEP, y2: (r + 1) * STEP });
+          }
+        }
+      }
+      return { hSegs, vSegs, cols, rows };
+    }
+
+    let grid = buildGrid();
+    window.addEventListener("resize", () => { grid = buildGrid(); });
+
+    // ── draw wires ───────────────────────────────────────────────────────────
+    function drawWires() {
+      const { hSegs, vSegs } = grid;
+      // horizontal
+      hSegs.forEach(s => {
+        const col = COLORS[Math.floor((s.x1 / STEP + s.y / STEP) % COLORS.length)];
+        ctx.beginPath();
+        ctx.moveTo(s.x1, s.y);
+        ctx.lineTo(s.x2, s.y);
+        ctx.strokeStyle = col.line;
+        ctx.lineWidth   = 0.8;
+        ctx.stroke();
+      });
+      // vertical
+      vSegs.forEach(s => {
+        const col = COLORS[Math.floor((s.x / STEP + s.y1 / STEP) % COLORS.length)];
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y1);
+        ctx.lineTo(s.x, s.y2);
+        ctx.strokeStyle = col.line;
+        ctx.lineWidth   = 0.8;
+        ctx.stroke();
+      });
+    }
+
+    // ── node dots at intersections ───────────────────────────────────────────
+    function drawNodes() {
+      const { cols, rows, hSegs, vSegs } = grid;
+      // Only draw a dot where an H and V segment visibly meet
+      const hSet = new Set(hSegs.map(s => `${s.x1},${s.y}`));
+      const vSet = new Set(vSegs.map(s => `${s.x},${s.y1}`));
+      for (let r = 0; r <= rows; r++) {
+        for (let c = 0; c <= cols; c++) {
+          const x = c * STEP, y = r * STEP;
+          // Check neighbour presence (simplified – just draw 15 % of grid intersections)
+          if (Math.random() < 0.15) {
+            const col = COLORS[(c + r) % COLORS.length];
+            ctx.beginPath();
+            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = col.orb;
+            ctx.globalAlpha = 0.35;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+    }
+
+    // ── orb class ────────────────────────────────────────────────────────────
+    class Orb {
+      constructor() { this.reset(true); }
+
+      reset(cold) {
+        const { hSegs, vSegs } = grid;
+        const useH = Math.random() < 0.5;
+        const segs  = useH ? hSegs : vSegs;
+        if (!segs.length) { this._dead = true; return; }
+        this._dead = false;
+        const seg   = segs[Math.floor(Math.random() * segs.length)];
+        this.horiz  = useH;
+        if (useH) {
+          this.x  = cold ? seg.x1 + Math.random() * (seg.x2 - seg.x1) : seg.x1;
+          this.y  = seg.y;
+          this.tx = seg.x2;
+          this.ty = seg.y;
+        } else {
+          this.x  = seg.x;
+          this.y  = cold ? seg.y1 + Math.random() * (seg.y2 - seg.y1) : seg.y1;
+          this.tx = seg.x;
+          this.ty = seg.y2;
+        }
+        const col    = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.color   = col.orb;
+        this.glow    = col.glow;
+        this.speed   = 0.06 + Math.random() * 0.08;
+        this.radius  = 2.2 + Math.random() * 1.8;
+        this.trail   = [];
+        this.maxTrail = 18 + Math.floor(Math.random() * 14);
+        this.alpha   = 0.55 + Math.random() * 0.45;
+      }
+
+      update() {
+        if (this._dead) return;
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > this.maxTrail) this.trail.shift();
+
+        const dx = this.tx - this.x;
+        const dy = this.ty - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < this.speed + 0.5) {
+          this.reset(false);
+        } else {
+          this.x += (dx / dist) * this.speed;
+          this.y += (dy / dist) * this.speed;
+        }
+      }
+
+      draw() {
+        if (this._dead) return;
+        // trail
+        const tl = this.trail.length;
+        this.trail.forEach((pt, i) => {
+          const t = i / tl;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, this.radius * 0.55 * t, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.globalAlpha = t * this.alpha * 0.45;
+          ctx.fill();
+        });
+
+        // outer glow
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius * 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = this.glow;
+        ctx.globalAlpha = this.alpha * 0.22;
+        ctx.fill();
+
+        // core
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.alpha;
+        ctx.fill();
+
+        // specular highlight
+        ctx.beginPath();
+        ctx.arc(this.x - this.radius * 0.28, this.y - this.radius * 0.28, this.radius * 0.35, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.globalAlpha = 0.45;
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    const ORB_COUNT = 5;
+    const orbs = Array.from({ length: ORB_COUNT }, () => new Orb());
+
+    // ── animation loop ───────────────────────────────────────────────────────
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawWires();
+      // drawNodes(); // optional subtle dots — disable for cleaner look
+      orbs.forEach(o => { o.update(); o.draw(); });
+      animRef.current = requestAnimationFrame(loop);
+    }
+    animRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(animRef.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed", top: 0, left: 0,
+        width: "100%", height: "100%",
+        pointerEvents: "none",
+        zIndex: 0,
+      }}
+    />
   );
 }
 
@@ -1032,6 +1363,18 @@ function ATLASMatrix() {
         setConfig(c => ({ ...c, ...parsed }));
       }
     } catch (e) { console.warn("Could not load config from localStorage"); }
+  }, []);
+
+  // Build reverse lookup: techniqueId → [mitigations]
+  const techToMitigations = useMemo(() => {
+    const map = {};
+    MITIGATIONS_DATA.forEach(m => {
+      m.techniques.forEach(tid => {
+        if (!map[tid]) map[tid] = [];
+        map[tid].push(m);
+      });
+    });
+    return map;
   }, []);
 
   const techsByTactic = useMemo(() => {
@@ -1064,7 +1407,9 @@ function ATLASMatrix() {
   const activeColor = selectedTactic ? TC[selectedTactic] : null;
 
   return (
-    <div style={{ background: "#070a11", minHeight: "100vh", color: "#dde4ed", fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" }}>
+    <div style={{ background: "#070a11", minHeight: "100vh", color: "#dde4ed", fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+      position: "relative", zIndex: 1 }}>
+      <CircuitBackground />
       <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet" />
       <style>{`
         @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
@@ -1100,8 +1445,8 @@ function ATLASMatrix() {
               <div style={{ fontSize: 11, color: "#5a6577", letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600 }}>Interactive Matrix · Optional AI-Powered Attack Simulation</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-              <div style={{ display: "flex", gap: 14 }}>
-                {[{ n: 16, l: "Tactics" }, { n: totalTechs, l: "Techniques" }, { n: totalSubs, l: "Sub-Techs" }].map(s => (
+              <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                {[{ n: 16, l: "Tactics" }, { n: totalTechs, l: "Techniques" }, { n: totalSubs, l: "Sub-Techs" }, { n: MITIGATIONS_DATA.length, l: "Mitigations" }].map(s => (
                   <div key={s.l} style={{ textAlign: "center" }}>
                     <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 16, fontWeight: 700, color: "#e0e6ed" }}>{s.n}</div>
                     <div style={{ fontSize: 8, color: "#5a6577", textTransform: "uppercase", letterSpacing: 1 }}>{s.l}</div>
@@ -1132,7 +1477,7 @@ function ATLASMatrix() {
           <div style={{ display: "flex", gap: 2, marginTop: 10, overflow: "auto" }}>
             {PHASES.map(g => (
               <div key={g.label} style={{ flex: g.ids.length, textAlign: "center", padding: "3px 4px", background: g.color + "0a", borderTop: `2px solid ${g.color}`, borderRadius: "3px 3px 0 0" }}>
-                <span style={{ fontSize: 7.5, fontWeight: 700, color: g.color, letterSpacing: 1.2, textTransform: "uppercase" }}>{g.label}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: g.color, letterSpacing: 1.2, textTransform: "uppercase" }}>{g.label}</span>
               </div>
             ))}
           </div>
@@ -1173,9 +1518,9 @@ function ATLASMatrix() {
             return (
               <div key={tactic.id} style={{ background: `linear-gradient(180deg, ${color.border}15 0%, ${color.bg} 100%)`, borderTop: `3px solid ${color.border}`, borderRadius: "5px 5px 0 0", padding: "8px 6px 7px", textAlign: "center", cursor: "default", animation: `fadeIn 0.25s ease ${ti * 0.03}s both`, position: "relative", zIndex: hoveredTactic === tactic.id ? 60 : 1 }}
                 onMouseEnter={() => setHoveredTactic(tactic.id)} onMouseLeave={() => setHoveredTactic(null)}>
-                <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: color.border, fontWeight: 600, marginBottom: 2, opacity: 0.75 }}>{tactic.id}</div>
-                <div style={{ fontSize: 10.5, fontWeight: 700, color: "#e0e8f0", lineHeight: 1.15, marginBottom: 3 }}>{tactic.name}</div>
-                <div style={{ fontSize: 8, color: color.border, fontWeight: 600, opacity: 0.6 }}>{cnt} technique{cnt !== 1 ? "s" : ""}</div>
+                <div style={{ fontSize: 9, fontFamily: "'JetBrains Mono',monospace", color: color.border, fontWeight: 600, marginBottom: 2, opacity: 0.75 }}>{tactic.id}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: "#e0e8f0", lineHeight: 1.15, marginBottom: 3 }}>{tactic.name}</div>
+                <div style={{ fontSize: 9, color: color.border, fontWeight: 600, opacity: 0.6 }}>{cnt} technique{cnt !== 1 ? "s" : ""}</div>
                 {hoveredTactic === tactic.id && (
                   <div style={{ position: "absolute", top: "calc(100% + 4px)", ...tooltipAlign, background: "#111827ee", border: `1px solid ${color.border}33`, borderRadius: 6, padding: "8px 11px", width: 220, zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.5)", fontSize: 10.5, color: "#9ca3af", lineHeight: 1.4, textAlign: "left", backdropFilter: "blur(6px)" }}>
                     {tactic.desc}
@@ -1230,27 +1575,53 @@ function ATLASMatrix() {
         ))}
       </div>
 
-      {/* Source credit - stays fixed at bottom-left, fades out when panel opens */}
+      {/* Source credit + QR code - fixed bottom-left, fades when panel opens */}
       <div style={{
         position: "fixed",
-        bottom: 10,
+        bottom: 14,
         left: 14,
-        fontSize: 8,
-        color: "#2a3344",
-        fontFamily: "'JetBrains Mono',monospace",
         zIndex: 99,
         opacity: selectedTech ? 0 : 1,
         pointerEvents: selectedTech ? "none" : "auto",
-        transition: "opacity 0.2s ease",
+        transition: "opacity 0.3s ease",
+        display: "flex",
+        alignItems: "flex-end",
+        gap: 12,
       }}>
-        © 2025 The MITRE Corporation · ATLAS™ v5.5.0 · Visualization by <a href="https://linkedin.com/in/marbekios" target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", textDecoration: "none" }}>Marino Bekios</a> · Not endorsed by MITRE
+        {/* QR code */}
+        <a href="https://linkedin.com/in/marbekios" target="_blank" rel="noopener noreferrer"
+           title="Marino Bekios on LinkedIn"
+           style={{ display: "block", flexShrink: 0 }}>
+          <img src="qr.png" alt="LinkedIn QR Code"
+               style={{
+                 width: 72, height: 72,
+                 borderRadius: 8,
+                 border: "1.5px solid #1e3a5f",
+                 background: "#fff",
+                 padding: 3,
+                 display: "block",
+                 boxShadow: "0 0 12px rgba(59,130,246,0.18)",
+               }} />
+        </a>
+        {/* Text credit */}
+        <div style={{
+          fontSize: 12,
+          color: "#4a5568",
+          fontFamily: "'JetBrains Mono',monospace",
+          lineHeight: 1.6,
+          paddingBottom: 4,
+        }}>
+          © 2025 The MITRE Corporation · ATLAS™ v5.5.0<br/>
+          Visualization by <a href="https://linkedin.com/in/marbekios" target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", textDecoration: "none" }}>Marino Bekios</a> · Not endorsed by MITRE
+        </div>
       </div>
 
       {selectedTech && activeColor && (
-        <DetailPanel tech={selectedTech} tacticName={activeTacticName} color={activeColor}
+        <DetailPanel tech={selectedTech} tacticName={activeTacticName} tacticId={selectedTactic} color={activeColor}
           onClose={() => { setSelectedTech(null); setSelectedTactic(null); }}
           highlightedTechs={highlightedTechs} setHighlightedTechs={setHighlightedTechs}
-          config={config} onOpenSettings={() => setShowSettings(true)} />
+          config={config} onOpenSettings={() => setShowSettings(true)}
+          techMitigations={techToMitigations[selectedTech.id] || []} />
       )}
 
       {showSettings && (
