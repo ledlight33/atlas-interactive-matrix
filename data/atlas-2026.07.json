@@ -10986,7 +10986,7 @@
     "sourceUrl": "https://github.com/mitre-atlas/atlas-data/releases/download/v2026.07/ATLAS-2026.07.yaml",
     "sha256": "0e07bb07fc6423d72cdf24ddc2038a6905bcbc00ba571064153119ee1a5888d4",
     "atlasModified": "2026-05-27",
-    "built": "2026-08-23",
+    "built": "2026-08-24",
     "counts": {
       "tactics": 16,
       "techniques": 101,

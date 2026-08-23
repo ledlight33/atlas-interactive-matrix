@@ -63,6 +63,16 @@ The 45 techniques graded Realized are exactly the 45 that appear in a documented
 
 This also feeds the simulation output. A generated severity is labelled `model: <rating>` and shown next to the ATLAS grade, because only one of those two claims is sourced.
 
+### Classic View, for the classroom
+
+A single button in the header switches the whole page to a light, static layout close to the classic MITRE look. It is built for showing the matrix to a room:
+
+* **Light background.** Dark themes with glow wash out badly on a projector in a lit room. White with high-contrast text carries to the back of the class, and it prints.
+* **Nothing moves.** The animated circuit background and the looping pulse on attack paths are switched off, so nothing competes with you while you explain a chain. Hover feedback stays, so you can still point at a technique with the mouse.
+* **The category colours do not change.** Tactic colours carry meaning, so they are identical in both views. Only their *text* shade is darkened where the bright palette would otherwise be unreadable on white. Every label was checked to at least a 3:1 contrast ratio.
+
+Your choice is remembered, so the matrix opens the way you left it.
+
 ### Focus Filters
 
 A filter bar above the matrix narrows it to what you care about. Filters dim rather than hide, so the shape of the matrix stays readable and you can still see what was excluded.
@@ -80,6 +90,10 @@ A filter bar above the matrix narrows it to what you care about. Filters dim rat
 ATLAS retires technique IDs by deleting them outright. There is no deprecation flag anywhere in the release, so an ID cited in an older report simply stops resolving.
 
 Because prior casework and published reports still reference those IDs, searching for one (say `T0058`) tells you it was retired, what replaced it, and offers to open the replacement, instead of returning no results.
+
+### First-Visit Guide
+
+The first time someone opens the matrix, a short dialog explains the four things that are not obvious from looking at it: incident replay, the Classic view button, the evidence dots and focus filters, and that AI simulation is optional. It links here for the full detail and appears only once per browser.
 
 ### ATT&CK Cross-References
 

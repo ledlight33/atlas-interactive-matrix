@@ -2,14 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.1] - 2026-08-23
-
-### Fixed
-
-- The Ollama settings panel wrongly claimed that a page served over HTTPS can never reach Ollama. Loopback addresses are potentially trustworthy origins under the Secure Contexts spec, so browsers exempt `http://localhost` and `http://127.0.0.1` from mixed-content blocking. The published HTTPS site reaches Ollama fine, and the banner was contradicting a working connection on screen. The check now looks at the target host and only warns for a genuinely blocked case, a non-loopback plain-HTTP address.
-- README corrected in the three places that repeated the same wrong claim: the Quick Start note, Known Limitations, and the Troubleshooting table.
-
-## [1.2.0] - 2026-08-23
+## [1.2.1] - 2026-08-24
 
 ### Data: MITRE ATLAS v5.5.0 (content 2026.03) to v2026.07
 
@@ -45,6 +38,10 @@ data with no model involved. 68 case studies, 571 steps, 122 source references.
 - `tools/build_data.py`, a reproducible data pipeline that pins a release, verifies its SHA-256, transforms the v6 schema, writes a readable copy to `data/`, and injects a compressed payload into `index.html`
 - A `--diff-from` flag reporting added, removed and renamed objects, and technique-to-tactic mapping changes, between any two ATLAS releases
 - Provenance recorded in `data/provenance.json` and embedded in the page, with the version badge exposing source URL, upstream hash and build date
+- Classic view: a light, static theme for presenting. One button in the header swaps the whole page to a white ATT&CK-style layout, turns off the animated background and the looping path pulse, and keeps hover feedback so you can still point at things. Tactic colours are deliberately unchanged; only their text shade is darkened where the bright palette would be unreadable on white. The choice is remembered.
+- Status colours (Demonstrated, Feasible, Exercise) were briefly rewritten to CSS variables during the theme work, which broke them: those values are concatenated with an alpha suffix, and `var(--warn)33` is not valid CSS. Exercise chips and the Demonstrated badge silently lost their background and border in both views. They are real hex again, with darkening applied through a helper instead.
+- Classic view fixes found while testing: sub-technique chips in the detail panel kept the dark tactic tint and were unreadable on white; the settings dialog used a hardcoded black scrim while other dialogs used the themed one; heavy black drop shadows read as grime on a light page and are now a theme token.
+- First-visit welcome dialog covering the four things that are not obvious from the matrix: incident replay, the Classic view button, evidence dots and focus filters, and optional AI simulation. It links to the README and appears once per browser.
 - Google Gemini as a fourth AI provider with live model discovery. The key is sent in the `x-goog-api-key` header rather than the `?key=` query parameter Google's quickstart uses, so the credential stays out of history and proxy logs.
 
 ### Changed
@@ -62,7 +59,7 @@ data with no model involved. 68 case studies, 571 steps, 122 source references.
 - `extractJSON` matched greedily to the last brace in the response, over-capturing when a model appended prose containing a brace or emitted a second object. It now scans for the first balanced object, ignoring braces inside strings.
 - Switching cloud provider kept the previous provider's model selected, so moving from Claude to OpenAI or Gemini would send an unrecognised model id and 404. The model now resets to the new provider's default, and the saved choice is restored when switching back.
 - The QR code is embedded as a data URI instead of loaded from a sibling `qr.png`. The relative image meant the page silently lost its QR whenever it was opened on its own, and under `file://` the page's own `img-src 'self'` policy blocks a relative image outright. The original image is embedded unchanged, byte for byte.
-- Ollama connection failures now name the actual cause rather than listing possibilities, and the check runs before "Test connection" is pressed. (The HTTPS branch of this check was wrong on release and is corrected in 1.2.1.)
+- Ollama connection failures name the actual cause rather than listing possibilities, and the check runs before "Test connection" is pressed. It inspects the target host, not just the page protocol: loopback is a trusted origin and is exempt from mixed-content blocking, so an HTTPS page reaches Ollama on localhost fine. Only a non-loopback plain-HTTP address is genuinely blocked.
 - One `innerHTML` sink in the dataset-load error handler that interpolated an error message. The messages are browser-generated rather than attacker-controlled, but a page holding an API key in `localStorage` should contain no HTML-injection sink at all. Rebuilt with DOM nodes and `textContent`.
 
 ### Documentation
