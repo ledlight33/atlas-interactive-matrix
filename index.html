@@ -45,7 +45,7 @@ const ATLAS_PAYLOAD_GZ = "H4sIAAAAAAAC/9S9a3PbSJYm/FewjpgpK4KULd/Lu++7oZLtKnXbbY
 // Version of this tool, distinct from the ATLAS content version above. The
 // badge in the header shows both, because they answer different questions:
 // which release of the matrix you are running, and which MITRE data it carries.
-const APP_VERSION = "1.2.0";
+const APP_VERSION = "1.2.1";
 
 // Assigned by bootstrap() at the bottom of this file, before anything renders.
 let ATLAS_DATA = null;
@@ -486,12 +486,24 @@ const CLOUD_PROVIDERS = {
 // than report a generic "cannot connect", work out which context this is.
 function ollamaEnvironmentIssue(ollamaUrl) {
   const proto = location.protocol;
-  const targetIsHttp = /^http:\/\//i.test((ollamaUrl || "").trim());
-  if (proto === "https:" && targetIsHttp) {
+  const url = (ollamaUrl || "").trim();
+  const targetIsHttp = /^http:\/\//i.test(url);
+  let host = "";
+  try { host = new URL(url).hostname.toLowerCase(); } catch (e) { /* malformed url */ }
+  // Loopback is a "potentially trustworthy origin" per the Secure Contexts spec,
+  // so browsers exempt it from mixed-content blocking. An HTTPS page CAN reach
+  // http://localhost. Only a non-loopback plain-HTTP host is actually blocked.
+  const isLoopback = host === "localhost" || host === "127.0.0.1" || host === "[::1]"
+    || host === "::1" || host.endsWith(".localhost");
+
+  if (proto === "https:" && targetIsHttp && !isLoopback) {
     return {
       blocking: true,
-      title: "Blocked: this page is served over HTTPS",
-      msg: "A page loaded over HTTPS cannot make plain-HTTP requests, because the browser blocks them as mixed content before Ollama ever sees them. This affects GitHub Pages and any other HTTPS host, and no Ollama setting can change it. Run the matrix locally over http:// instead (see “Local HTTP server” in the README), or use a cloud provider here.",
+      title: "Blocked: HTTPS page cannot reach a plain-HTTP host",
+      msg: "This page is served over HTTPS, so the browser blocks plain-HTTP requests to "
+        + (host || "that address") + " as mixed content. Loopback is exempt from that rule, so "
+        + "point this at http://localhost:11434 or http://127.0.0.1:11434 and it will work, "
+        + "or serve the matrix itself over http://.",
     };
   }
   if (proto === "file:") {

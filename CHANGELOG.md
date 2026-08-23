@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-08-23
+
+### Fixed
+
+- The Ollama settings panel wrongly claimed that a page served over HTTPS can never reach Ollama. Loopback addresses are potentially trustworthy origins under the Secure Contexts spec, so browsers exempt `http://localhost` and `http://127.0.0.1` from mixed-content blocking. The published HTTPS site reaches Ollama fine, and the banner was contradicting a working connection on screen. The check now looks at the target host and only warns for a genuinely blocked case, a non-loopback plain-HTTP address.
+- README corrected in the three places that repeated the same wrong claim: the Quick Start note, Known Limitations, and the Troubleshooting table.
+
 ## [1.2.0] - 2026-08-23
 
 ### Data: MITRE ATLAS v5.5.0 (content 2026.03) to v2026.07
@@ -54,8 +61,8 @@ data with no model involved. 68 case studies, 571 steps, 122 source references.
 - Selecting a multi-tactic technique from a different matrix column enforced the previously selected tactic in the simulation. `DetailPanel` was reused across selections and `handleSimulate` closed over a stale `tacticId`.
 - `extractJSON` matched greedily to the last brace in the response, over-capturing when a model appended prose containing a brace or emitted a second object. It now scans for the first balanced object, ignoring braces inside strings.
 - Switching cloud provider kept the previous provider's model selected, so moving from Claude to OpenAI or Gemini would send an unrecognised model id and 404. The model now resets to the new provider's default, and the saved choice is restored when switching back.
-- The QR code is embedded as a data URI instead of loaded from a sibling `qr.png`. The relative image meant the page silently lost its QR whenever it was opened on its own, and under `file://` the page's own `img-src 'self'` policy blocks a relative image outright. Recompressed from 1230px RGB to 410px 16-colour, so the fix costs 9 KB rather than 66 KB.
-- Ollama connection failures now name the actual cause. The page checks its own protocol: served over HTTPS, plain-HTTP requests to Ollama are blocked as mixed content and no Ollama setting can help; opened via `file://`, requests carry `Origin: null` and need `OLLAMA_ORIGINS="*"`. Both are surfaced before "Test connection" is pressed.
+- The QR code is embedded as a data URI instead of loaded from a sibling `qr.png`. The relative image meant the page silently lost its QR whenever it was opened on its own, and under `file://` the page's own `img-src 'self'` policy blocks a relative image outright. The original image is embedded unchanged, byte for byte.
+- Ollama connection failures now name the actual cause rather than listing possibilities, and the check runs before "Test connection" is pressed. (The HTTPS branch of this check was wrong on release and is corrected in 1.2.1.)
 - One `innerHTML` sink in the dataset-load error handler that interpolated an error message. The messages are browser-generated rather than attacker-controlled, but a page holding an API key in `localStorage` should contain no HTML-injection sink at all. Rebuilt with DOM nodes and `textContent`.
 
 ### Documentation

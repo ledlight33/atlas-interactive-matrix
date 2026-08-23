@@ -109,7 +109,7 @@ The 37 techniques with a MITRE ATT&CK Enterprise counterpart link straight to it
 
 ## Quick Start
 
-> **If you plan to use Ollama, skip to Option 3.** A page opened by double-clicking (`file://`) cannot reliably reach Ollama, and a page served over HTTPS cannot reach it at all. The settings panel will tell you which situation you are in.
+> **If you plan to use Ollama, Option 3 is the most reliable.** Ollama works from the published HTTPS site too, because browsers treat `localhost` as a trusted origin, but a page opened by double-clicking (`file://`) cannot always reach it. The settings panel tells you which situation you are in.
 
 ### Option 1: Open locally (simplest)
 
@@ -312,7 +312,7 @@ This tool is designed for **educational exploration**, not as a substitute for p
 - **Attack path enforcement:** When a model fails to include the selected technique, the system retries once with stricter parameters and auto-injects the technique if needed, clearly labeling it as "AUTO-CORRECTED."
 - **Browser-only:** API keys are stored in `localStorage` without encryption. Do not use on shared or public computers.
 - **Shared origin on GitHub Pages:** `localStorage` is scoped to the origin, not the path, so every project published under the same `username.github.io` account shares it. If you host the AI-enabled version there, any other page on that domain can read the stored key. Use a custom domain, or use Ollama, if that matters to you.
-- **Ollama needs a local HTTP origin:** a page served over HTTPS cannot reach `http://localhost`, so Ollama does not work on the published GitHub Pages site. The settings panel says so when it detects this.
+- **Ollama over HTTPS:** the published site can reach Ollama on `localhost`, because loopback addresses are exempt from mixed-content blocking. Pointing it at a plain-HTTP address that is *not* loopback (another machine on your LAN, for example) is blocked, and the settings panel says so when it detects that.
 - **ATLAS data freshness:** Technique data is bundled from ATLAS v2026.07 and pinned by SHA-256. Updating is a single command, described in [Updating the ATLAS data](#updating-the-atlas-data).
 
 ---
@@ -366,13 +366,14 @@ The supersession map lives in the build script and is validated against the data
 
 Ollama serves plain HTTP on `localhost`, and browsers restrict which pages may call it. The settings panel detects your situation and says which one applies, but in short:
 
-| How you opened the page | Ollama reachable? | What to do |
+| How you opened the page | Ollama on `localhost` reachable? | Notes |
 |---|---|---|
-| `http://localhost:8080` (Option 3) | ✅ Yes | Nothing, this is the supported setup |
+| `http://localhost:8080` (Option 3) | ✅ Yes | The most reliable setup |
+| GitHub Pages or any `https://` host | ✅ Yes | Loopback (`localhost`, `127.0.0.1`) is a trusted origin and is exempt from mixed-content blocking, so an HTTPS page may reach it. Chrome and Firefox 84+ allow this; Safari is stricter. |
 | Double-clicked the file (`file://`) | ⚠️ Sometimes | Requires `OLLAMA_ORIGINS="*"`, and some browsers refuse regardless. Use Option 3. |
-| GitHub Pages or any `https://` host | ❌ Never | The browser blocks plain-HTTP requests from an HTTPS page as mixed content. No Ollama setting can change this, so run locally over HTTP or use a cloud provider. |
+| Ollama on another machine over plain HTTP | ❌ Blocked from HTTPS | A non-loopback `http://` address really is blocked as mixed content. Serve the matrix over `http://`, or put Ollama behind HTTPS. |
 
-If you are on `http://localhost` and it still fails, check that Ollama is running (open `http://localhost:11434`, you should see "Ollama is running") and that it was started with `OLLAMA_ORIGINS="*"`.
+Whatever the context, check that Ollama is running (open `http://localhost:11434`, you should see "Ollama is running") and that it was started with `OLLAMA_ORIGINS="*"` so the browser is allowed to call it.
 
 Cloud providers (Claude, OpenAI, Gemini) are HTTPS and work in every context, including GitHub Pages.
 
@@ -393,24 +394,10 @@ See [LICENSE](LICENSE) and [NOTICE](NOTICE) for full details.
 Contributions are welcome. Please open an issue first to discuss what you would like to change.
 
 Areas where contributions would be valuable:
-- Forensic artifact mappings, meaning what evidence each technique leaves behind (see roadmap v1.3)
 - Additional ATLAS case study context
 - Improved prompts for specific local models
 - Accessibility improvements
 - Mobile responsiveness
-
----
-
-## Roadmap
-
-The direction is to move this from an *anticipatory* tool (imagine an attack) toward an *evidentiary* one (reconstruct what happened, and prove it).
-
-- [x] **v1.0** Interactive ATLAS matrix with AI attack simulation
-- [x] **v1.2** ATLAS v2026.07, documented incident replay, evidence grading, focus filters, retired-ID resolution, Gemini support, and a reproducible data pipeline with SHA-256 provenance
-- [ ] **v1.3** Forensic evidence layer: what artifact each technique leaves, in which log source, with what retention
-- [ ] **v1.4** Reverse triage (observation to candidate techniques) and point-in-time matrix reconstruction
-- [ ] **v1.5** Defensible export: Markdown, JSON, STIX 2.1 and ATT&CK Navigator, carrying full provenance
-- [ ] **v2.0** OWASP LLM Top 10 cross-framework labelling (CWE, ATT&CK, NIST AI RMF, AIVSS)
 
 ---
 
