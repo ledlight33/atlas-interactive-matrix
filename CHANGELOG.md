@@ -54,6 +54,10 @@ data with no model involved. 68 case studies, 571 steps, 122 source references.
 
 ### Fixed
 
+- Narrow screens had no usable way to reach the rest of the matrix. Sixteen tactic columns need 1773px at readable size, so on a 1366px laptop about three columns sat off-screen. Three things combined to hide that: the container capped at 1800px was 13px narrower than the grid needs, so even a 2560px display scrolled slightly; `overflow-x: hidden` on the body blocked page-level scrolling; and the scrollbar was 5px tall at 1.22:1 contrast, effectively invisible. The matrix also scrolled inside its own container, which put the horizontal bar below the fold on any screen shorter than the board.
+- The matrix now scrolls with the page, so the horizontal bar stays pinned to the bottom of the window where it can be found. Scrollbars are 14px with real contrast and themed per view. A fade on the right edge shows there is more board, and clears at the end.
+- Added a zoom control with a Fit button that scales the board so all sixteen tactics fit the window, in the spirit of ATT&CK Navigator. On a 1366px laptop Fit lands at 74%. Shrinking tiles by default was rejected: even at 85px columns the board still would not fit 1366px, and the names become unreadable, so the choice is left to the viewer. The controls only appear when the board does not already fit.
+
 - Build reproducibility: `technique_incidents` sorted a set by date alone, but several case studies share a date, so ties fell to set iteration order and varied between runs. Sorting by (date, id) makes the order total. Without this the embedded payload differed on every build and could not be checked against `data/`.
 - Selecting a multi-tactic technique from a different matrix column enforced the previously selected tactic in the simulation. `DetailPanel` was reused across selections and `handleSimulate` closed over a stale `tacticId`.
 - `extractJSON` matched greedily to the last brace in the response, over-capturing when a model appended prose containing a brace or emitted a second object. It now scans for the first balanced object, ignoring braces inside strings.

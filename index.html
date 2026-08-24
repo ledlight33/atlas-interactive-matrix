@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; connect-src https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com http://localhost:* http://127.0.0.1:*; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:;">
 <title>MITRE ATLAS™ Interactive Matrix · AI Attack Simulator</title>
-<style>* { margin: 0; padding: 0; box-sizing: border-box; } body { background: #070a11; overflow-x: hidden; }</style>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; } body { background: #070a11; }</style>
 <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" integrity="sha512-8Q6Y9XnTbOE+JNvjBQwJ2H8S+UV4uA6hiRykhdtIyDYZ2TprdNmWOUaKdGzOhyr4dCyk287OejbPvwl7lrfqrQ=="></script>
 <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" integrity="sha512-MOCpqoRoisCTwJ8vQQiciZv0qcpROCidek3GTFS6KTk2+y7munJIlKCVkFCYY+p3ErYFXCjmFjnfTTRSC1OHWQ=="></script>
 <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js" integrity="sha512-OG8Ewzlpr7HnTHwrXzN256M6xbPdDJdurFYIRh0vRHOeFsL0S9yIwHiWSA2kopUevhG/ta4qyVVc2hCRSJy2MQ=="></script>
@@ -55,11 +55,12 @@ const THEMES = {
       "--surface": "#0e1420", "--surface2": "#0a0e17", "--surface3": "#0b1018",
       "--surface-a": "#0e1420ee", "--input": "#070b12", "--tooltip": "#111827ee",
       "--scrim": "rgba(3,5,10,0.85)", "--rowline": "#101724", "--rowhover": "#111a28",
-      "--thumb": "#1a2030", "--line": "#151d2e", "--border": "#1e293b",
+      "--line": "#151d2e", "--border": "#1e293b",
       "--border2": "#1a2235", "--border3": "#2a3040", "--strong": "#ffffff",
       "--text": "#dde4ed", "--body": "#cbd5e1", "--muted": "#9aa6b8",
       "--dim": "#64748b", "--dim2": "#4a5568",
       "--warn": "#fbbf24", "--ok": "#86efac", "--bad": "#fca5a5", "--info": "#60a5fa",
+      "--track": "#0d1421", "--thumb": "#33405a", "--thumb-hover": "#4a5a7a",
       "--shadow": "0 20px 60px rgba(0,0,0,0.7)",
     },
   },
@@ -71,12 +72,13 @@ const THEMES = {
       "--surface": "#ffffff", "--surface2": "#fafbfd", "--surface3": "#ffffff",
       "--surface-a": "#ffffffee", "--input": "#ffffff", "--tooltip": "#ffffffF2",
       "--scrim": "rgba(30,41,59,0.55)", "--rowline": "#eaedf2", "--rowhover": "#eef2f7",
-      "--thumb": "#c3cbd8", "--line": "#e2e6ed", "--border": "#d5dae3",
+      "--line": "#e2e6ed", "--border": "#d5dae3",
       "--border2": "#ccd3de", "--border3": "#ccd3de", "--strong": "#0f172a",
       "--text": "#1f2937", "--body": "#374151", "--muted": "#4b5563",
       "--dim": "#6b7280", "--dim2": "#737b87",
       // Accents re-tuned for white: the dark palette pastels fail contrast here.
       "--warn": "#b45309", "--ok": "#15803d", "--bad": "#b91c1c", "--info": "#1d4ed8",
+      "--track": "#e6eaf0", "--thumb": "#9aa5b6", "--thumb-hover": "#7b8798",
       "--shadow": "0 12px 32px rgba(15,23,42,0.14)",
     },
   },
@@ -84,6 +86,13 @@ const THEMES = {
 
 // Tile fill. Dark uses the tactic's own deep tint; classic washes the same hue
 // over white so the category stays recognisable without darkening the page.
+// Sixteen tactic columns at their 108px minimum, plus the gaps between them,
+// plus the container padding. Below this viewport width the full matrix cannot
+// be shown at readable size, so the user gets to choose between scrolling and
+// zooming out rather than having shrunken tiles forced on them.
+const MATRIX_MIN_W = 16 * 108 + 15 * 3;   // 1773
+const MATRIX_MAX_W = MATRIX_MIN_W + 40;   // + padding; was 1800, which was 13px short
+
 let CLASSIC = false;  // set during render by ATLASMatrix; see note there
 const tileFill = color => (CLASSIC ? color.border + "14" : color.bg);
 
@@ -2046,6 +2055,9 @@ function ATLASMatrix() {
   // avoids threading `classic` through eight nested components.
   CLASSIC = theme === "classic";
   const [showWelcome, setShowWelcome] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [hiddenRight, setHiddenRight] = useState(0);
+  const scrollerRef = useRef(null);
   const [openIncident, setOpenIncident] = useState(null);
   const [showIncidents, setShowIncidents] = useState(false);
   const [config, setConfig] = useState({ provider: "none", apiKey: "", ollamaUrl: "http://localhost:11434", ollamaModel: "llama3.2", cloudModel: "claude-sonnet-4-5", temperature: 0.6, topP: 0.9, numCtx: 8192, numPredict: 2000 });
@@ -2067,6 +2079,43 @@ function ATLASMatrix() {
     document.body.style.background = THEMES[theme].vars["--bg"];
     try { localStorage.setItem("atlas_theme", theme); } catch (e) {}
   }, [theme]);
+
+  // How much of the matrix is off-screen to the right. Drives the edge fade, so
+  // there is a visible cue that the board continues rather than just a scrollbar.
+  const onMatrixScroll = useCallback(() => {
+    const d = document.documentElement;
+    setHiddenRight(Math.max(0, d.scrollWidth - d.clientWidth - d.scrollLeft));
+  }, []);
+
+  // Scale the board down until all sixteen columns fit the window. CSS zoom is
+  // used rather than transform because it reflows: the scroll container then
+  // sees the real, smaller size instead of a visually shrunken overflow.
+  const fitToWidth = useCallback(() => {
+    const usable = document.documentElement.clientWidth - 40;
+    setZoom(Math.min(1, Math.max(0.5, Math.round((usable / MATRIX_MIN_W) * 100) / 100)));
+  }, []);
+
+  useEffect(() => {
+    try {
+      const z = parseFloat(localStorage.getItem("atlas_zoom"));
+      if (z >= 0.5 && z <= 1) setZoom(z);
+    } catch (e) {}
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("atlas_zoom", String(zoom)); } catch (e) {}
+    const id = requestAnimationFrame(onMatrixScroll);
+    return () => cancelAnimationFrame(id);
+  }, [zoom, onMatrixScroll]);
+
+  useEffect(() => {
+    window.addEventListener("resize", onMatrixScroll);
+    window.addEventListener("scroll", onMatrixScroll, { passive: true });
+    return () => {
+      window.removeEventListener("resize", onMatrixScroll);
+      window.removeEventListener("scroll", onMatrixScroll);
+    };
+  }, [onMatrixScroll]);
 
   const dismissWelcome = useCallback(() => {
     setShowWelcome(false);
@@ -2187,9 +2236,11 @@ function ATLASMatrix() {
         @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
         @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
         @keyframes pathPulse { 0%,100% { opacity:0.85; } 50% { opacity:1; } }
-        ::-webkit-scrollbar { width:5px; height:5px; }
-        ::-webkit-scrollbar-track { background:var(--bg); }
-        ::-webkit-scrollbar-thumb { background:var(--thumb); border-radius:3px; }
+        ::-webkit-scrollbar { width:8px; height:14px; }
+        ::-webkit-scrollbar-track { background:var(--track); border-radius:7px; }
+        ::-webkit-scrollbar-thumb { background:var(--thumb); border-radius:7px; border:3px solid var(--track); }
+        ::-webkit-scrollbar-thumb:hover { background:var(--thumb-hover); }
+        * { scrollbar-color: var(--thumb) var(--track); scrollbar-width: auto; }
       `}</style>
 
       {THEMES[theme].scanlines && (
@@ -2198,7 +2249,7 @@ function ATLASMatrix() {
 
       {/* Header */}
       <div style={{ background: "linear-gradient(180deg, var(--bg2), var(--bg))", borderBottom: "1px solid var(--line)", padding: "14px 20px 10px", position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ maxWidth: 1800, margin: "0 auto" }}>
+        <div style={{ maxWidth: MATRIX_MAX_W, margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 10 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
@@ -2328,6 +2379,40 @@ function ATLASMatrix() {
                 clear
               </button>
             )}
+
+            {/* Zoom, pushed to the right so it reads as a view control rather
+                than another filter. Only earns its place when the board does
+                not fit, but stays visible once used so it can be undone. */}
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
+              {(hiddenRight > 2 || zoom < 1) && (
+                <>
+                  <span style={{ fontSize: 8.5, color: "var(--dim2)", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginRight: 2 }}>Zoom</span>
+                  {[["−", -0.05, "Zoom out"], ["+", 0.05, "Zoom in"]].map(([sym, delta, tip]) => (
+                    <button key={sym} title={tip}
+                      onClick={() => setZoom(z => Math.min(1, Math.max(0.5, Math.round((z + delta) * 100) / 100)))}
+                      style={{ background: "transparent", border: "1px solid var(--border2)", color: "var(--dim)", width: 22, height: 20, borderRadius: 4, cursor: "pointer", fontSize: 12, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.color = "#3b82f6"; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border2)"; e.currentTarget.style.color = "var(--dim)"; }}>
+                      {sym}
+                    </button>
+                  ))}
+                  <span style={{ fontSize: 9, color: "var(--dim2)", fontFamily: "'JetBrains Mono',monospace", width: 30, textAlign: "center" }}>
+                    {Math.round(zoom * 100)}%
+                  </span>
+                  <button onClick={fitToWidth}
+                    title="Scale the matrix so all 16 tactics fit this window. Useful before projecting, so you are not scrolling in front of a room."
+                    style={{ background: "#3b82f612", border: "1px solid #3b82f644", color: "#60a5fa", fontSize: 9.5, fontWeight: 600, padding: "3px 9px", borderRadius: 4, cursor: "pointer" }}>
+                    Fit
+                  </button>
+                  {zoom !== 1 && (
+                    <button onClick={() => setZoom(1)} title="Back to full size"
+                      style={{ background: "none", border: "none", color: "var(--dim2)", fontSize: 9.5, cursor: "pointer", textDecoration: "underline", padding: "3px 4px" }}>
+                      reset
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
 
           <div style={{ display: "flex", gap: 2, marginTop: 10, overflow: "auto" }}>
@@ -2342,7 +2427,7 @@ function ATLASMatrix() {
 
       {/* Search */}
       {filter && filteredTechs && (
-        <div style={{ padding: "12px 20px", borderBottom: "1px solid var(--line)", maxWidth: 1800, margin: "0 auto" }}>
+        <div style={{ padding: "12px 20px", borderBottom: "1px solid var(--line)", maxWidth: MATRIX_MAX_W, margin: "0 auto" }}>
           {retired && (
             <div style={{ marginBottom: 9, padding: "8px 11px", background: "#f59e0b0a", border: "1px solid #f59e0b33", borderRadius: 6, display: "flex", alignItems: "flex-start", gap: 8 }}>
               <span style={{ fontSize: 13, flexShrink: 0 }}>⧗</span>
@@ -2374,8 +2459,25 @@ function ATLASMatrix() {
       )}
 
       {/* Matrix */}
-      <div style={{ overflowX: "auto", padding: "0 20px 140px", maxWidth: 1800, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${ATLAS_DATA.tactics.length}, minmax(108px, 1fr))`, gap: 3, paddingTop: 6 }}>
+      {/* Edge cue. A scrollbar alone is easy to miss on a laptop, so the board
+          fades at the right while there is more of it, and the fade clears once
+          you reach the end. Sits outside the scroller so it stays put. */}
+      {hiddenRight > 2 && (
+        <div style={{
+          position: "fixed", top: 0, right: 0, bottom: 0, width: 54, zIndex: 90,
+          pointerEvents: "none",
+          background: "linear-gradient(to right, transparent, var(--bg))",
+        }} />
+      )}
+
+      <div ref={scrollerRef}
+        // Deliberately NOT its own scroll container. A container-level scrollbar
+        // sits at the bottom of the container, and since the board is taller than
+        // the window that puts it below the fold where nobody finds it. Letting
+        // the page scroll instead keeps the bar pinned to the bottom of the
+        // window, where it is always reachable.
+        style={{ padding: "0 20px 140px", maxWidth: MATRIX_MAX_W, margin: "0 auto", position: "relative" }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${ATLAS_DATA.tactics.length}, minmax(108px, 1fr))`, gap: 3, paddingTop: 6, zoom }}>
           {ATLAS_DATA.tactics.map((tactic, ti) => {
             const color = TC[tactic.id];
             const cnt = techsByTactic[tactic.id]?.length || 0;

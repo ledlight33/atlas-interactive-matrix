@@ -73,6 +73,17 @@ A single button in the header switches the whole page to a light, static layout 
 
 Your choice is remembered, so the matrix opens the way you left it.
 
+### Screen Sizes
+
+The matrix is sixteen tactic columns wide. At a readable tile size that needs about 1810px of window, so it fits a 1080p laptop and anything larger without scrolling.
+
+Below that, the board is not shrunk automatically, because at the point where sixteen columns fit a 1366px screen the technique names stop being readable. Instead you choose:
+
+* **Scroll.** The page scrolls horizontally, with the bar pinned to the bottom of the window and a fade at the right edge while there is more board.
+* **Fit.** A zoom control appears whenever the board does not fit. Fit scales it so all sixteen tactics land on screen at once, which is what you want before projecting rather than scrolling in front of a room. On a 1366px laptop that works out to 74%.
+
+The zoom setting is remembered, and the controls stay hidden entirely on screens where they are not needed.
+
 ### Focus Filters
 
 A filter bar above the matrix narrows it to what you care about. Filters dim rather than hide, so the shape of the matrix stays readable and you can still see what was excluded.
